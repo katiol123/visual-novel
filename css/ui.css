@@ -79,7 +79,9 @@
 .toast-clue em { color: #3a352a; }
 
 /* ============ модалки ============ */
-.modal { position: absolute; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .3s; z-index: 5; }
+.modal { position: absolute; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .3s; z-index: 20; }
+/* кейс: верх окна зафиксирован, при смене описания растёт только низ */
+.modal-inv { align-items: flex-start; padding-top: 110px; }
 .modal.in { opacity: 1; }
 .modal-card { width: 1560px; max-height: 960px; display: flex; flex-direction: column; background: linear-gradient(160deg, #0d1210, #050706); box-shadow: 0 40px 120px rgba(0,0,0,.8), inset 0 0 0 1px rgba(182,255,59,.12); transform: translateY(30px) scale(.98); transition: transform .35s cubic-bezier(.2,.9,.3,1.2); }
 .modal.in .modal-card { transform: none; }

@@ -312,7 +312,8 @@
           if (!drag && Math.hypot(dx, dy) > 6) { drag = true; elx.classList.add('dragging'); }
           if (drag) {
             elx.style.transform = `translate(${dx}px, ${dy}px) scale(1.15)`;
-            const z = this.zoneAt(ev.clientX, ev.clientY);
+            let z = this.zoneAt(ev.clientX, ev.clientY, elx);
+            if (z && z !== o.zone && !this.canPlace(z)) z = null;
             if (hover !== z) { this.root.querySelectorAll('.hot').forEach((h) => h.classList.remove('hot')); z && this.zoneBox(z).classList.add('hot'); hover = z; }
           }
         };
@@ -321,8 +322,9 @@
           window.removeEventListener('pointerup', up);
           this.root.querySelectorAll('.hot').forEach((h) => h.classList.remove('hot'));
           if (drag) {
+            // зону ищем ДО снятия .dragging, иначе под курсором окажется сам куб
+            const z = this.zoneAt(ev.clientX, ev.clientY, elx);
             elx.classList.remove('dragging');
-            const z = this.zoneAt(ev.clientX, ev.clientY);
             if (z && z !== o.zone && this.canPlace(z)) this.place(o, z, true);
             else this.place(o, o.zone, true);
           } else this.cycle(o);
@@ -332,8 +334,10 @@
       });
     }
     zoneBox(z) { return z === 'tray' ? this.$('.cb-tray') : this.$('.s-' + z); }
-    zoneAt(x, y) {
+    /** Зона под курсором; перетаскиваемый куб (и всё внутри него) пропускаем. */
+    zoneAt(x, y, skip) {
       for (const n of document.elementsFromPoint(x, y)) {
+        if (skip && skip.contains(n)) continue;
         const z = n.closest && n.closest('[data-zone]');
         if (z && this.root.contains(z)) return z.dataset.zone;
       }

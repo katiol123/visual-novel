@@ -110,7 +110,7 @@
 .slot .combo i { font-style: normal; font-family: var(--f-cond); font-weight: 700; font-size: 17px; letter-spacing: .1em; color: #0a0f05; background: var(--acid); padding: 1px 8px; animation: comboIn .3s cubic-bezier(.5,0,.6,1.6); }
 @keyframes comboIn { from { transform: scale(2); opacity: 0; } }
 .slot.filled { background: color-mix(in srgb, var(--sc) 10%, rgba(0,0,0,.3)); box-shadow: 0 0 30px color-mix(in srgb, var(--sc) 25%, transparent); }
-.slot.hot, .cb-tray.hot { transform: scale(1.03); background: color-mix(in srgb, var(--sc, #fff) 20%, rgba(0,0,0,.3)); border-style: solid; }
+.slot.hot, .cb-tray.hot { box-shadow: 0 0 0 3px var(--sc, rgba(232,226,208,.6)), 0 0 40px color-mix(in srgb, var(--sc, #fff) 35%, transparent); background: color-mix(in srgb, var(--sc, #fff) 20%, rgba(0,0,0,.3)); border-style: solid; }
 .slot.locked { opacity: .35; filter: grayscale(.8); }
 .slot-lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--f-display); font-size: 22px; color: var(--paper); pointer-events: none; }
 .slot:not(.locked) .slot-lock { display: none; }
@@ -118,7 +118,7 @@
 .cb-table .die { cursor: grab; touch-action: none; z-index: 1; }
 .combat.assigning .cb-tray .die { animation: dieHint 1.6s ease-in-out infinite; }
 @keyframes dieHint { 50% { filter: drop-shadow(0 0 10px rgba(182,255,59,.6)); } }
-.cb-table .die.dragging { cursor: grabbing; z-index: 50; filter: drop-shadow(0 20px 20px rgba(0,0,0,.7)); transition: none; }
+.cb-table .die.dragging { cursor: grabbing; z-index: 50; pointer-events: none; filter: drop-shadow(0 20px 20px rgba(0,0,0,.7)); transition: none; }
 .die.fire { animation: fire .4s; }
 @keyframes fire { 30% { filter: brightness(3) drop-shadow(0 0 30px #ffd23a); transform: scale(1.3); } }
 

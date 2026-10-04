@@ -160,5 +160,7 @@
 .die-blood .face { background: radial-gradient(circle at 30% 25%, #ff5c74, #c4102e 60%, #6e0014); }
 .die-blood .face i.pip { background: radial-gradient(circle at 35% 35%, #fff, #e8dcd0); box-shadow: none; }
 .die::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: -12%; height: 18%; border-radius: 50%; background: rgba(0,0,0,.5); filter: blur(5px); z-index: -1; }
-.die.landed .cube { animation: land .35s; }
-@keyframes land { 40% { filter: brightness(1.6); } }
+/* «приземление» анимирует корень кубика, а не .cube: filter на preserve-3d
+   сплющивает куб и на миг показывает не ту грань */
+.die.landed { animation: land .35s ease-out; }
+@keyframes land { 40% { transform: scale(1.12); } }

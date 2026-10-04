@@ -67,7 +67,7 @@
 
 /* ================= досье ================= */
 .dossier {
-  position: absolute; right: 120px; top: 110px; width: 470px; padding: 26px 28px 30px;
+  position: absolute; right: 120px; top: 110px; width: 470px; padding: 26px 28px 104px;
   background: linear-gradient(180deg, #ebe3cc, #d6ccb0); color: #1a1712;
   box-shadow: 0 30px 80px rgba(0,0,0,.7), inset 0 0 60px rgba(120,90,40,.25);
   transform: translateX(700px) rotate(14deg); opacity: 0;
@@ -94,12 +94,17 @@
 .dossier-threat i { width: 22px; height: 10px; border: 2px solid #1a1712; }
 .dossier-threat i.on { background: #9b1020; border-color: #9b1020; }
 .dossier-stamp {
-  position: absolute; right: 18px; top: 260px; padding: 6px 16px;
-  border: 5px solid var(--s); color: var(--s); font-family: var(--f-display); font-size: 30px;
-  transform: rotate(-16deg) scale(3); opacity: 0; mix-blend-mode: multiply; filter: saturate(1.4) brightness(.8);
+  /* штамп на чистом поле бумаги под текстом — не перекрывает фото */
+  position: absolute; right: 26px; bottom: 22px; padding: 6px 18px 4px;
+  --ink: color-mix(in srgb, var(--s) 55%, #14060a);
+  border: 5px double var(--ink); color: var(--ink);
+  background: rgba(240, 232, 208, .94);
+  font-family: var(--f-display); font-size: 30px; letter-spacing: .04em; white-space: nowrap;
+  box-shadow: 0 0 0 3px rgba(240, 232, 208, .94), 0 4px 14px rgba(0,0,0,.25);
+  transform: rotate(-7deg) scale(3); opacity: 0;
   transition: transform .25s cubic-bezier(.5,0,.7,1.5), opacity .1s;
 }
-.dossier.stamped .dossier-stamp { transform: rotate(-16deg) scale(1); opacity: .9; }
+.dossier.stamped .dossier-stamp { transform: rotate(-7deg) scale(1); opacity: 1; }
 .dossier-hint { position: absolute; bottom: -34px; right: 0; font-family: var(--f-cond); font-size: 16px; color: var(--paper); letter-spacing: .2em; opacity: .6; animation: blink 1.4s infinite; }
 @keyframes blink { 50% { opacity: .15; } }
 
