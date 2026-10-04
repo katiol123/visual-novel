@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Последняя ночь года</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Oswald:wght@400;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/stage.css">
+  <link rel="stylesheet" href="css/dialogue.css">
+  <link rel="stylesheet" href="css/ui.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/combat.css">
+</head>
+<body>
+  <div id="game">
+    <div id="shaker">
+      <div id="bg-wrap"><canvas id="bg"></canvas></div>
+      <div id="sprites"></div>
+    </div>
+    <div id="fx"></div>
+
+    <div id="textbox">
+      <div class="nameplate"><span class="np-name"></span><span class="np-tag"></span></div>
+      <div class="tb-frame">
+        <div class="tb-phone"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="tb-text"></div>
+        <div class="tb-next"><i></i></div>
+      </div>
+    </div>
+    <div id="choices"></div>
+    <div id="hud"></div>
+    <div id="toasts"></div>
+    <div id="overlay"></div>
+    <div id="transition"></div>
+    <div id="post"><i class="grain"></i><i class="scan"></i><i class="vig"></i></div>
+  </div>
+  <div id="rotate"><b>⟳</b>Поверни телефон горизонтально — сцена рассчитана на 16:9</div>
+
+  <!-- ядро -->
+  <script src="js/core/namespace.js"></script>
+  <script src="js/core/state.js"></script>
+  <script src="js/core/audio.js"></script>
+  <!-- данные -->
+  <script src="js/data/characters.js"></script>
+  <script src="js/data/items.js"></script>
+  <script src="js/data/enemies.js"></script>
+  <script src="js/data/codex.js"></script>
+  <!-- рендер -->
+  <script src="js/render/backdrop.js"></script>
+  <script src="js/data/locations.js"></script>
+  <script src="js/render/stage.js"></script>
+  <script src="js/render/transitions.js"></script>
+  <script src="js/render/typewriter.js"></script>
+  <!-- интерфейс -->
+  <script src="js/ui/hud.js"></script>
+  <script src="js/ui/dialogue.js"></script>
+  <script src="js/ui/choices.js"></script>
+  <script src="js/ui/inventory.js"></script>
+  <script src="js/ui/board.js"></script>
+  <script src="js/ui/saves.js"></script>
+  <script src="js/ui/screens.js"></script>
+  <!-- системы -->
+  <script src="js/systems/dice.js"></script>
+  <script src="js/systems/checks.js"></script>
+  <script src="js/systems/combat.js"></script>
+  <!-- движок -->
+  <script src="js/engine/story.js"></script>
+  <script src="js/engine/runner.js"></script>
+  <!-- сценарий -->
+  <script src="js/story/prologue.js"></script>
+  <script src="js/story/endings.js"></script>
+  <!-- старт -->
+  <script src="js/main.js"></script>
+</body>
+</html>

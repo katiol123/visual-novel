@@ -1,0 +1,210 @@
+/* ==========================================================================
+   Полноэкранные экраны:
+     Title     — опознание: восемь силуэтов у ростовой линейки
+     Creation  — «Кем ты был?»: три досье-предыстории
+     Loadout   — ящик комода: взять N предметов
+     Ending    — карточка концовки
+   ========================================================================== */
+(function () {
+  'use strict';
+  const VN = window.VN;
+  const { el, sleep, esc } = VN.util;
+
+  /* ---------------- титульный экран ---------------- */
+  const Title = {
+    node: null,
+    show() {
+      VN.Dialogue.hide();
+      VN.HUD.show(false);
+      VN.Stage.clearInstant();
+      VN.Fx.laser(false);
+      VN.Backdrop.set('street');
+      VN.Audio.combatMusic(false);
+      VN.Audio.ambient('rain');
+      if (this.node) this.node.remove();
+      const t = (this.node = el('div', 'title-screen'));
+      const cast = ['frog', 'shef', 'grokh', 'kir', 'pelmen', 'goose', 'bugai', 'ded'];
+      const hasSave = !!VN.State.peek('auto');
+      const ends = Object.keys(VN.Meta.data.endings).length;
+      t.innerHTML = `
+        <div class="lineup">
+          <div class="lineup-wall">${[210, 200, 190, 180, 170, 160, 150].map((n) => `<div class="hl"><span>${n}</span></div>`).join('')}</div>
+          <div class="lineup-cast">${cast.map((id, i) => `
+            <div class="suspect" style="--c:${VN.Characters[id].color};--i:${i}">
+              <img src="${VN.Characters[id].sprite}" alt="" draggable="false">
+              <div class="plate"><b>${i + 1}</b><span>${VN.Characters[id].short || VN.Characters[id].name}</span></div>
+            </div>`).join('')}</div>
+        </div>
+        <div class="title-logo">
+          <div class="tl-kicker">ПОРТ-ВЕТРОВ · 31.12 · 23:07</div>
+          <h1><span class="tl-a">ПОСЛЕДНЯЯ</span><span class="tl-b">НОЧЬ ГОДА</span></h1>
+          <div class="tl-sub">криминальная драма · пролог · 8 концовок</div>
+        </div>
+        <div class="title-menu">
+          <button data-a="new">НОВОЕ ДЕЛО</button>
+          <button data-a="cont" ${hasSave ? '' : 'disabled'}>ПРОДОЛЖИТЬ</button>
+          <button data-a="load">ЗАГРУЗИТЬ</button>
+          <button data-a="board">КОНЦОВКИ <small>${ends}/8</small></button>
+        </div>
+        <div class="title-foot">Пробел / клик — дальше · 1–9 — выбор · I — кейс · B — доска · L — журнал · A — авто · S — пропуск · H — скрыть UI</div>`;
+      document.getElementById('game').appendChild(t);
+      requestAnimationFrame(() => t.classList.add('in'));
+      t.addEventListener('click', (e) => e.stopPropagation());
+      t.querySelectorAll('[data-a]').forEach((b) => {
+        b.addEventListener('mouseenter', () => VN.Audio.sfx('hover'));
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          VN.Audio.init(); VN.Audio.sfx('select');
+          const a = b.dataset.a;
+          if (a === 'new') { this.hide(); VN.Runner.newGame(); }
+          if (a === 'cont') { this.hide(); VN.Runner.loadSlot('auto'); }
+          if (a === 'load') VN.Saves.open(true);
+          if (a === 'board') VN.Board.open();
+        });
+      });
+    },
+    hide() {
+      const t = this.node; if (!t) return;
+      this.node = null;
+      t.classList.add('out');
+      setTimeout(() => t.remove(), 900);
+    },
+  };
+
+  /* ---------------- создание персонажа ---------------- */
+  const Creation = {
+    run() {
+      return new Promise((resolve) => {
+        const s = el('div', 'screen creation');
+        s.innerHTML = `<div class="cr-head"><small>ЛИЧНОЕ ДЕЛО · КОРСАК Я.</small><h2>Кем ты был, прежде чем всё пошло к чёрту?</h2></div><div class="cr-cards"></div>`;
+        const cards = s.querySelector('.cr-cards');
+        Object.entries(VN.Backgrounds).forEach(([id, b], i) => {
+          const c = el('button', 'cr-card');
+          c.style.setProperty('--d', i * 120 + 'ms');
+          c.innerHTML = `
+            <div class="cr-ic">${VN.Icons[b.icon]}</div>
+            <div class="cr-name">${b.name}</div>
+            <div class="cr-stats">${Object.entries(VN.State.STATS).map(([k, st]) => `<div style="--c:${st.color}"><span>${st.name}</span><b>${'<i></i>'.repeat(b.stats[k])}${'<i class="off"></i>'.repeat(3 - b.stats[k])}</b></div>`).join('')}</div>
+            <p>${b.text}</p>
+            <div class="cr-perk">${b.perk}</div>
+            <div class="cr-hp">ЗДОРОВЬЕ ${b.hp} · ${VN.Items[b.item].name}</div>
+            <div class="cr-stamp">ПРИНЯТО</div>`;
+          c.addEventListener('mouseenter', () => VN.Audio.sfx('hover'));
+          c.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (s.dataset.done) return; s.dataset.done = 1;
+            c.classList.add('chosen'); s.classList.add('decided');
+            VN.Audio.sfx('stamp');
+            const S = VN.S;
+            S.background = id; S.stats = { ...b.stats }; S.hp = S.maxHp = b.hp;
+            VN.State.give(b.item, 1, true);
+            VN.bus.emit('state');
+            await sleep(1300);
+            s.classList.add('out'); await sleep(500); s.remove(); VN.Input.modal--;
+            VN.Toast.show(`<small>ПОЛУЧЕНО</small><b>${VN.Items[b.item].name}</b>`, 'item', VN.Icons[VN.Items[b.item].icon]);
+            resolve(id);
+          });
+          cards.appendChild(c);
+        });
+        VN.Input.modal++;
+        document.getElementById('overlay').appendChild(s);
+        requestAnimationFrame(() => s.classList.add('in'));
+      });
+    },
+  };
+
+  /* ---------------- ящик комода ---------------- */
+  const Loadout = {
+    run({ count, options }) {
+      return new Promise((resolve) => {
+        const chosen = new Set();
+        const s = el('div', 'screen loadout');
+        s.innerHTML = `<div class="cr-head"><small>ЯЩИК КОМОДА</small><h2>Карманов — два. Что берёшь?</h2></div><div class="lo-items"></div><button class="btn btn-acid lo-go" disabled>ВЗЯТЬ <span>0/${count}</span></button>`;
+        const box = s.querySelector('.lo-items'), go = s.querySelector('.lo-go');
+        options.forEach((id, i) => {
+          const it = VN.Items[id];
+          const extra = it.bundle ? Object.entries(it.bundle).map(([b, n]) => ` + ${VN.Items[b].name} ×${n}`).join('') : it.qty ? ` ×${it.qty}` : '';
+          const c = el('button', 'lo-item');
+          c.style.setProperty('--d', i * 90 + 'ms');
+          c.innerHTML = `<div class="lo-ic">${VN.Icons[it.icon]}</div><b>${it.name}${extra}</b><p>${it.desc}</p><i class="lo-check"></i>`;
+          c.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (chosen.has(id)) chosen.delete(id);
+            else if (chosen.size < count) chosen.add(id);
+            else { VN.Audio.sfx('lock'); return; }
+            VN.Audio.sfx('click');
+            c.classList.toggle('on', chosen.has(id));
+            go.disabled = chosen.size !== count;
+            go.querySelector('span').textContent = `${chosen.size}/${count}`;
+          });
+          box.appendChild(c);
+        });
+        go.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          VN.Audio.sfx('select');
+          s.classList.add('out'); await sleep(500); s.remove(); VN.Input.modal--;
+          for (const id of chosen) {
+            const it = VN.Items[id];
+            VN.State.give(id, it.qty || 1);
+            if (it.bundle) Object.entries(it.bundle).forEach(([b, n]) => VN.State.give(b, n));
+            await sleep(250);
+          }
+          resolve([...chosen]);
+        });
+        VN.Input.modal++;
+        document.getElementById('overlay').appendChild(s);
+        requestAnimationFrame(() => s.classList.add('in'));
+      });
+    },
+  };
+
+  /* ---------------- концовка ---------------- */
+  const Ending = {
+    show(id) {
+      return new Promise((resolve) => {
+        const e = VN.Endings[id];
+        const first = !VN.Meta.data.endings[id];
+        VN.Meta.unlock(id);
+        VN.Dialogue.hide();
+        VN.HUD.show(false);
+        VN.Audio.combatMusic(false);
+        const S = VN.S;
+        const blocks = new Set(S.path.filter((p) => (VN.Story.get(p) || {}).block)).size;
+        const clues = Object.keys(VN.Clues).filter((k) => S.flags[k]).length;
+        const s = el('div', 'screen ending');
+        s.style.setProperty('--c', e.color);
+        s.innerHTML = `
+          <div class="en-kicker">КОНЕЦ ПРОЛОГА${first ? ' · <b>НОВАЯ КОНЦОВКА</b>' : ''}</div>
+          <div class="en-title">${e.title}</div>
+          <div class="en-sub">${e.sub}</div>
+          <div class="en-stats">
+            <div><b>${VN.State.clock()}</b><span>время</span></div>
+            <div><b>${blocks}/10</b><span>блоков пройдено</span></div>
+            <div><b>${clues}/${Object.keys(VN.Clues).length}</b><span>улик</span></div>
+            <div><b>${Object.keys(VN.Meta.data.endings).length}/8</b><span>концовок открыто</span></div>
+          </div>
+          <div class="en-next">ГЛАВА I · «ЧЁРНАЯ БУХГАЛТЕРИЯ» — СКОРО</div>
+          <div class="en-btns"><button class="btn btn-acid" data-a="new">НОВОЕ ДЕЛО</button><button class="btn btn-ghost" data-a="board">ДОСКА УЛИК</button><button class="btn btn-ghost" data-a="menu">ГЛАВНОЕ МЕНЮ</button></div>`;
+        s.addEventListener('click', (ev) => ev.stopPropagation());
+        s.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          VN.Audio.sfx('select');
+          const a = b.dataset.a;
+          if (a === 'board') { VN.Board.open(); return; }
+          s.classList.add('out'); setTimeout(() => s.remove(), 600);
+          if (a === 'new') VN.Runner.newGame();
+          if (a === 'menu') VN.Title.show();
+          resolve(a);
+        }));
+        document.getElementById('overlay').appendChild(s);
+        VN.Audio.sfx('impact');
+        requestAnimationFrame(() => s.classList.add('in'));
+      });
+    },
+  };
+
+  VN.Title = Title;
+  VN.Creation = Creation;
+  VN.Loadout = Loadout;
+  VN.Ending = Ending;
+})();

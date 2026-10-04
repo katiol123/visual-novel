@@ -1,0 +1,156 @@
+/* ==========================================================================
+   Диалоговое окно, табличка имени, эффекты текста, выборы.
+   ========================================================================== */
+#textbox {
+  position: absolute; left: 150px; right: 150px; bottom: 36px; height: 262px; z-index: 40;
+  opacity: 0; transform: translateY(40px); transition: opacity .35s, transform .45s cubic-bezier(.2,.8,.2,1), filter .3s;
+  --c: var(--paper);
+}
+#textbox.open { opacity: 1; transform: none; }
+#textbox.dimmed { opacity: .35; filter: blur(2px); }
+
+.tb-frame {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(14,20,17,.9), rgba(4,6,5,.94)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 2px, transparent 2px 6px);
+  clip-path: polygon(0 18px, 18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+}
+.tb-frame::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+  background: var(--c); box-shadow: 0 0 22px var(--c); transition: background .3s;
+}
+.tb-frame::after {
+  content: ''; position: absolute; left: 6px; right: 0; top: 0; height: 2px;
+  background: linear-gradient(90deg, var(--c), transparent 60%); opacity: .7;
+}
+
+.tb-text {
+  position: absolute; left: 70px; right: 90px; top: 52px; bottom: 30px;
+  font-family: var(--f-serif); font-size: 36px; line-height: 1.5; color: var(--paper);
+  text-shadow: 0 2px 6px rgba(0,0,0,.8);
+}
+#textbox[data-style="narrator"] .tb-text { font-style: italic; color: #cfd6cc; font-size: 35px; }
+#textbox[data-style="narrator"] .tb-frame { background: linear-gradient(180deg, rgba(4,6,5,.55), rgba(0,0,0,.88)); }
+#textbox[data-style="narrator"] .tb-frame::before { background: rgba(232,226,208,.25); box-shadow: none; }
+#textbox[data-style="phone"] .tb-text { font-family: var(--f-mono); font-size: 32px; color: #cdeeff; }
+#textbox[data-style="self"] .tb-text { color: #f4efe0; }
+
+/* табличка имени */
+.nameplate {
+  position: absolute; left: -16px; top: -46px; z-index: 2; display: flex; align-items: baseline; gap: 16px;
+  padding: 10px 34px 10px 30px; background: var(--c); color: #070907;
+  clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+  transform: perspective(600px) rotateX(90deg); transform-origin: 50% 100%; opacity: 0;
+  transition: transform .35s cubic-bezier(.2,.9,.3,1.3), opacity .2s;
+}
+.nameplate.on { transform: perspective(600px) rotateX(0); opacity: 1; }
+.nameplate.swap { animation: plateSwap .45s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes plateSwap { 0% { transform: perspective(600px) rotateX(-90deg); } 100% { transform: perspective(600px) rotateX(0); } }
+.np-name { font-family: var(--f-display); font-size: 32px; letter-spacing: .04em; white-space: nowrap; }
+.np-tag { font-family: var(--f-cond); font-size: 18px; letter-spacing: .2em; text-transform: uppercase; opacity: .7; white-space: nowrap; }
+.nameplate::after { content: ''; position: absolute; left: 30px; right: 30px; bottom: -8px; height: 3px; background: var(--c); transform-origin: 0 50%; animation: underline .6s .1s both; opacity: .6; }
+@keyframes underline { from { transform: scaleX(0); } }
+
+/* индикатор «дальше» — вращающийся кубик */
+.tb-next { position: absolute; right: 36px; bottom: 26px; width: 26px; height: 26px; opacity: 0; transition: opacity .2s; perspective: 200px; }
+#textbox.ready .tb-next { opacity: 1; }
+.tb-next i { position: absolute; inset: 0; border: 3px solid var(--c); background: rgba(0,0,0,.3); animation: nextSpin 1.6s cubic-bezier(.6,0,.4,1) infinite; box-shadow: 0 0 12px var(--c); }
+.tb-next i::after { content: ''; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: var(--c); }
+@keyframes nextSpin { 0% { transform: rotateX(0) rotateZ(0) translateY(0); } 50% { transform: rotateX(180deg) rotateZ(45deg) translateY(-6px); } 100% { transform: rotateX(360deg) rotateZ(90deg) translateY(0); } }
+
+/* телефонные волны */
+.tb-phone { position: absolute; left: 26px; top: 50%; height: 60px; margin-top: -30px; display: none; gap: 4px; align-items: center; }
+#textbox[data-style="phone"] .tb-phone { display: flex; }
+.tb-phone i { width: 4px; height: 20px; background: var(--c); border-radius: 2px; animation: wave .8s ease-in-out infinite; }
+.tb-phone i:nth-child(2) { animation-delay: .1s; } .tb-phone i:nth-child(3) { animation-delay: .2s; } .tb-phone i:nth-child(4) { animation-delay: .3s; } .tb-phone i:nth-child(5) { animation-delay: .4s; }
+@keyframes wave { 50% { height: 50px; } }
+
+/* ============ символы печатной машинки ============ */
+.tb-text .w { white-space: nowrap; display: inline-block; }
+.ch { display: inline-block; opacity: 0; white-space: pre; }
+.ch.on { animation: chIn .28s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes chIn { 0% { opacity: 0; transform: translateY(8px) scale(1.3); filter: blur(4px); color: var(--c); } 100% { opacity: 1; transform: none; filter: none; } }
+.settled .ch.on { animation: none; opacity: 1; }
+
+.ch.fx-red { color: #ff4d66; text-shadow: 0 0 14px rgba(255,42,77,.7); }
+.ch.fx-green { color: var(--acid); text-shadow: 0 0 14px rgba(182,255,59,.6); }
+.ch.fx-violet { color: var(--violet); text-shadow: 0 0 14px rgba(194,123,255,.6); }
+.ch.fx-ice { color: var(--ice); text-shadow: 0 0 14px rgba(127,214,255,.6); }
+.ch.fx-amber { color: var(--amber); text-shadow: 0 0 14px rgba(255,176,46,.6); }
+.ch.fx-i { font-style: italic; }
+.ch.fx-b { font-weight: 700; }
+.ch.fx-big { font-size: 1.35em; font-weight: 700; line-height: 1; }
+.ch.fx-whisper { font-size: .8em; opacity: .6 !important; letter-spacing: .06em; }
+.ch.on.fx-shake { animation: chIn .28s forwards, shk .12s calc(var(--r) * -1s) linear infinite; }
+.settled .ch.on.fx-shake { animation: shk .12s calc(var(--r) * -1s) linear infinite; }
+@keyframes shk { 0% { transform: translate(0, 0); } 25% { transform: translate(-1.5px, 1px) rotate(-2deg); } 50% { transform: translate(1px, -1.5px); } 75% { transform: translate(1.5px, 1px) rotate(2deg); } }
+.ch.on.fx-wave { animation: chIn .28s forwards, wv 1.2s calc(var(--i) * -.09s) ease-in-out infinite; }
+.settled .ch.on.fx-wave { animation: wv 1.2s calc(var(--i) * -.09s) ease-in-out infinite; }
+@keyframes wv { 50% { transform: translateY(-7px); } }
+.ch.on.fx-glitch { animation: chIn .28s forwards, gl 1.6s calc(var(--r) * -1.6s) steps(1) infinite; }
+.settled .ch.on.fx-glitch { animation: gl 1.6s calc(var(--r) * -1.6s) steps(1) infinite; }
+@keyframes gl {
+  0%, 82% { transform: none; text-shadow: none; opacity: 1; }
+  84% { transform: translate(-3px, 1px) skewX(20deg); text-shadow: 3px 0 var(--blood), -3px 0 var(--ice); }
+  88% { opacity: .2; } 92% { transform: translate(2px, -2px); text-shadow: -2px 0 var(--acid); opacity: 1; }
+}
+
+/* ============ выборы ============ */
+#choices {
+  position: absolute; right: 150px; left: 480px; bottom: 320px; z-index: 50;
+  display: none; flex-direction: column; gap: 10px; align-items: stretch;
+}
+#choices.open { display: flex; }
+.ch-prompt { font-family: var(--f-cond); font-size: 22px; letter-spacing: .3em; color: var(--acid); text-transform: uppercase; margin-bottom: 4px; }
+.ch-card {
+  position: relative; display: flex; align-items: center; gap: 22px; text-align: left;
+  padding: 12px 30px 12px 22px; min-height: 66px;
+  background: linear-gradient(90deg, rgba(6,9,7,.94), rgba(14,20,17,.9));
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 0 100%);
+  box-shadow: inset 4px 0 0 rgba(232,226,208,.25);
+  opacity: 0; transform: translateX(80px) skewX(-6deg);
+  transition: transform .35s cubic-bezier(.2,.9,.3,1.2), opacity .3s, background .2s, box-shadow .2s;
+  transition-delay: var(--d);
+  overflow: hidden;
+}
+#choices.in .ch-card { opacity: 1; transform: none; }
+.ch-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(182,255,59,.22) 50%, transparent 70%); transform: translateX(-100%); transition: transform .5s; }
+.ch-card:not(.locked):hover::before { transform: translateX(100%); }
+.ch-card:not(.locked):hover { background: linear-gradient(90deg, rgba(20,30,10,.96), rgba(30,44,16,.92)); box-shadow: inset 6px 0 0 var(--acid), 0 0 40px rgba(182,255,59,.12); transform: translateX(-12px); transition-delay: 0s; }
+.ch-num { font-family: var(--f-display); font-size: 30px; color: var(--acid); opacity: .8; min-width: 54px; }
+.ch-main { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.ch-text { font-family: var(--f-serif); font-size: 28px; line-height: 1.28; color: var(--paper); }
+.ch-tags { display: flex; gap: 10px; flex-wrap: wrap; }
+.tag { font-family: var(--f-cond); font-size: 17px; letter-spacing: .1em; padding: 3px 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15); text-transform: uppercase; }
+.tag-time { color: var(--amber); border-color: rgba(255,176,46,.4); }
+.tag-item { color: var(--ice); border-color: rgba(127,214,255,.4); }
+.tag-check-str { color: #ff7a7a; border-color: rgba(255,90,90,.5); }
+.tag-check-agi { color: var(--acid); border-color: rgba(182,255,59,.5); }
+.tag-check-nrv { color: var(--violet); border-color: rgba(194,123,255,.5); }
+.tag-fight { color: var(--blood); border-color: rgba(255,42,77,.5); }
+.tag-flag { color: var(--paper); }
+.ch-arrow { font-size: 22px; color: var(--acid); opacity: 0; transform: translateX(-10px); transition: all .2s; }
+.ch-card:hover .ch-arrow { opacity: 1; transform: none; }
+.ch-card.locked { cursor: not-allowed; }
+.ch-card.locked .ch-text { color: #6a716a; text-decoration: line-through; text-decoration-color: rgba(255,42,77,.5); }
+.ch-card.locked .ch-num { color: #555; }
+.ch-lock { font-family: var(--f-cond); font-size: 17px; letter-spacing: .12em; color: var(--blood); text-transform: uppercase; white-space: nowrap; }
+.ch-card.nope { animation: nope .35s; }
+@keyframes nope { 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+.ch-card.picked { transform: translateX(-30px) scale(1.03); background: var(--acid); transition-delay: 0s; }
+.ch-card.picked .ch-text, .ch-card.picked .ch-num { color: #0a0f05; }
+.ch-card.picked .tag { color: #0a0f05; border-color: rgba(0,0,0,.3); }
+.ch-card.gone { opacity: 0 !important; transform: translateX(100px) !important; transition-delay: 0s; }
+
+/* фитиль таймера */
+.ch-fuse { position: relative; height: 10px; background: rgba(255,255,255,.08); margin-bottom: 8px; }
+.ch-fuse i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background: linear-gradient(90deg, var(--blood), var(--amber)); box-shadow: 0 0 20px var(--blood); transform-origin: 0 50%; }
+.ch-fuse.burn i { animation: fuse var(--t) linear forwards; }
+.ch-fuse b { position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px; border-radius: 50%; background: radial-gradient(circle, #fff, var(--amber) 40%, transparent 70%); left: 100%; animation: spark .1s infinite alternate; }
+.ch-fuse.burn b { animation: spark .1s infinite alternate, fuseSpark var(--t) linear forwards; }
+@keyframes fuse { to { transform: scaleX(0); } }
+@keyframes fuseSpark { to { left: 0; } }
+@keyframes spark { to { transform: scale(1.4); } }
+#choices.timed .ch-card { box-shadow: inset 4px 0 0 var(--blood); }

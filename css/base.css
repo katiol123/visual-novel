@@ -1,0 +1,127 @@
+/* ==========================================================================
+   База: токены, сцена 1920×1080 с масштабированием, постобработка, кнопки.
+   ========================================================================== */
+:root {
+  --acid: #b6ff3b;
+  --violet: #c27bff;
+  --blood: #ff2a4d;
+  --ice: #7fd6ff;
+  --amber: #ffb02e;
+  --ink: #050706;
+  --paper: #e8e2d0;
+  --muted: #8a9488;
+  --glass: rgba(8, 12, 10, 0.82);
+  --f-display: 'Rubik Mono One', 'Oswald', Impact, sans-serif;
+  --f-cond: 'Oswald', 'Arial Narrow', sans-serif;
+  --f-serif: 'PT Serif', Georgia, serif;
+  --f-mono: 'IBM Plex Mono', Consolas, monospace;
+  --f-hand: 'Caveat', 'Comic Sans MS', cursive;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; overflow: clip; background: #000; }
+body { color: var(--paper); font-family: var(--f-serif); -webkit-font-smoothing: antialiased; user-select: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button:disabled { cursor: default; }
+svg { display: block; }
+
+#game {
+  position: fixed; left: 50%; top: 50%;
+  width: 1920px; height: 1080px;
+  transform-origin: 50% 50%;
+  overflow: hidden; overflow: clip; background: #000;
+  cursor: default;
+}
+
+#shaker, #bg-wrap, #sprites, #fx, #overlay, #transition, #post, #toasts { position: absolute; inset: 0; }
+#bg-wrap { transform: scale(1.02); }
+#bg { width: 100%; height: 100%; display: block; }
+#fx { pointer-events: none; z-index: 30; }
+#overlay { z-index: 60; pointer-events: none; }
+#overlay > * { pointer-events: auto; }
+#transition { z-index: 90; pointer-events: none; }
+#post { z-index: 100; pointer-events: none; }
+#toasts { z-index: 70; pointer-events: none; }
+
+/* тряска */
+#shaker.shaking { animation: shake .45s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shake {
+  10%, 90% { transform: translate(calc(var(--p) * -.3), calc(var(--p) * .2)); }
+  20%, 80% { transform: translate(calc(var(--p) * .6), calc(var(--p) * -.4)); }
+  30%, 50%, 70% { transform: translate(calc(var(--p) * -1), calc(var(--p) * .6)); }
+  40%, 60% { transform: translate(var(--p), calc(var(--p) * -.8)); }
+}
+
+/* глитч всей картинки */
+#game.glitching #shaker { animation: glitchShift .6s steps(2) both; }
+@keyframes glitchShift {
+  0% { filter: none; transform: none; }
+  15% { filter: url(#none) hue-rotate(90deg) saturate(3); transform: translate(-18px, 4px) skewX(6deg); clip-path: inset(10% 0 60% 0); }
+  30% { filter: hue-rotate(-60deg) contrast(2); transform: translate(22px, -6px); clip-path: inset(50% 0 10% 0); }
+  45% { filter: invert(.15); transform: translate(-6px, 0) skewX(-10deg); clip-path: inset(0 0 0 0); }
+  60% { filter: saturate(4) hue-rotate(160deg); transform: translate(10px, 2px); clip-path: inset(30% 0 40% 0); }
+  100% { filter: none; transform: none; clip-path: inset(0 0 0 0); }
+}
+
+/* вспышки */
+.fx-flash { position: absolute; inset: 0; animation: flash forwards ease-out; mix-blend-mode: screen; }
+@keyframes flash { from { opacity: 1; } to { opacity: 0; } }
+
+/* лазерный прицел */
+.laser { position: absolute; inset: 0; }
+.laser-beam {
+  position: absolute; left: 1320px; top: 365px; width: 515px; height: 2px;
+  transform-origin: 0 50%; transform: rotate(147.7deg);
+  background: linear-gradient(90deg, rgba(255,30,60,.0), rgba(255,30,60,.7));
+  box-shadow: 0 0 10px rgba(255,30,60,.8);
+  animation: laserJitter 2.4s ease-in-out infinite;
+}
+.laser-dot {
+  position: absolute; left: 876px; top: 631px; width: 18px; height: 18px; border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 20%, #ff2a4d 40%, rgba(255,42,77,0) 70%);
+  box-shadow: 0 0 30px 10px rgba(255,30,60,.5);
+  animation: dotJitter 2.4s ease-in-out infinite;
+}
+@keyframes laserJitter { 50% { transform: rotate(147deg); } }
+@keyframes dotJitter { 25% { transform: translate(6px, -4px); } 50% { transform: translate(-3px, 8px); } 75% { transform: translate(-6px, -2px); } }
+
+/* постобработка: зерно, сканлайны, виньетка */
+#post i { position: absolute; inset: 0; }
+#post .vig { background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,.65) 100%); }
+#post .scan { background: repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 1px, transparent 1px 3px); opacity: .5; }
+#post .grain {
+  inset: -100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.55'/></svg>");
+  opacity: .09; animation: grain .5s steps(4) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); } 25% { transform: translate(-5%, 3%); }
+  50% { transform: translate(4%, -6%); } 75% { transform: translate(-2%, 5%); } 100% { transform: translate(3%, -2%); }
+}
+
+/* кнопки */
+.btn {
+  font-family: var(--f-cond); font-weight: 700; font-size: 26px; letter-spacing: .08em;
+  padding: 14px 30px; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  transition: transform .15s, background .15s, color .15s, filter .15s;
+}
+.btn small { font-size: .65em; opacity: .7; margin-left: 6px; letter-spacing: .04em; }
+.btn-acid { background: var(--acid); color: #0a0f05; }
+.btn-acid:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); box-shadow: 0 0 30px rgba(182,255,59,.5); }
+.btn-ghost { background: rgba(255,255,255,.06); color: var(--paper); box-shadow: inset 0 0 0 2px rgba(232,226,208,.25); }
+.btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,.14); }
+.btn:disabled { opacity: .35; }
+.muted { color: var(--muted); }
+
+/* скрытый интерфейс */
+#game.ui-hidden #textbox, #game.ui-hidden #hud, #game.ui-hidden #choices, #game.ui-hidden #toasts { opacity: 0 !important; pointer-events: none; }
+
+/* портретная ориентация на телефоне */
+#rotate { display: none; }
+@media (orientation: portrait) and (max-width: 900px) {
+  #rotate {
+    display: flex; position: fixed; inset: auto 16px 16px; z-index: 200; padding: 14px 18px; gap: 12px; align-items: center;
+    background: rgba(5,7,6,.92); border-left: 4px solid var(--acid); font-family: var(--f-cond); font-size: 16px; letter-spacing: .08em; color: var(--paper);
+  }
+  #rotate b { font-size: 26px; color: var(--acid); }
+}

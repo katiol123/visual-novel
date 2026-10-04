@@ -1,0 +1,157 @@
+/* ==========================================================================
+   Спрайты, их появления, фокус, удары. Досье-карточка. Переходы.
+   ========================================================================== */
+#sprites { z-index: 10; pointer-events: none; }
+
+.sprite {
+  position: absolute; bottom: -70px; width: 1000px; height: 1000px; margin-left: -500px;
+  transition: left .6s cubic-bezier(.2,.8,.2,1), filter .4s, transform .4s;
+  --rim: #fff;
+}
+.sprite-body { position: absolute; inset: 0; animation: breathe 5s ease-in-out infinite; transform-origin: 50% 100%; }
+.sprite-img {
+  width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,.9)) drop-shadow(-8px 0 18px color-mix(in srgb, var(--rim) 35%, transparent));
+  transition: filter .4s;
+}
+.sprite-shadow {
+  position: absolute; left: 50%; bottom: 74px; width: 420px; height: 46px; margin-left: -210px;
+  background: radial-gradient(ellipse, rgba(0,0,0,.75), rgba(0,0,0,0) 70%);
+}
+@keyframes breathe { 50% { transform: scaleY(1.008) translateY(-2px); } }
+
+/* фокус говорящего */
+.sprite.lit { z-index: 2; transform: scale(1.025); }
+.sprite.dim .sprite-img { filter: brightness(.42) saturate(.6) drop-shadow(0 0 2px rgba(0,0,0,.9)); }
+.sprite.dim { transform: translateY(14px) scale(.985); }
+
+/* вход: силуэт → цвет */
+.sprite.enter-silhouette .sprite-body { opacity: 0; }
+.sprite.enter-silhouette.in .sprite-body { animation: silIn 1.25s cubic-bezier(.2,.7,.2,1) forwards; }
+@keyframes silIn {
+  0% { opacity: 0; transform: translateX(-60px); filter: brightness(0) drop-shadow(0 0 0 var(--rim)); }
+  30% { opacity: 1; transform: translateX(0); filter: brightness(0) drop-shadow(0 0 3px var(--rim)) drop-shadow(0 0 30px var(--rim)); }
+  55% { filter: brightness(0) drop-shadow(0 0 3px var(--rim)) drop-shadow(0 0 40px var(--rim)); }
+  100% { opacity: 1; filter: brightness(1) drop-shadow(0 0 0 transparent); }
+}
+/* вход: падение сверху */
+.sprite.enter-drop .sprite-body { opacity: 0; }
+.sprite.enter-drop.in .sprite-body { animation: dropIn .7s cubic-bezier(.5,0,.6,1.4) forwards; }
+@keyframes dropIn { 0% { opacity: 0; transform: translateY(-900px) scaleY(1.2); } 60% { opacity: 1; transform: translateY(20px) scaleY(.92); } 100% { opacity: 1; transform: none; } }
+/* вход: скольжение */
+.sprite.enter-slide .sprite-body { opacity: 0; }
+.sprite.enter-slide.in .sprite-body { animation: slideIn .6s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes slideIn { 0% { opacity: 0; transform: translateX(400px) skewX(-12deg); filter: blur(10px); } 100% { opacity: 1; transform: none; filter: none; } }
+/* вход: глитч */
+.sprite.enter-glitch .sprite-body { opacity: 0; }
+.sprite.enter-glitch.in .sprite-body { animation: glitchIn .7s steps(7) forwards; }
+@keyframes glitchIn {
+  0% { opacity: 0; } 15% { opacity: 1; transform: translateX(-30px); clip-path: inset(0 0 70% 0); filter: hue-rotate(90deg); }
+  30% { transform: translateX(30px); clip-path: inset(40% 0 20% 0); } 45% { opacity: .3; clip-path: inset(70% 0 0 0); }
+  60% { opacity: 1; transform: translateX(-10px); clip-path: inset(0 0 0 0); filter: saturate(3); } 100% { opacity: 1; transform: none; filter: none; }
+}
+/* вход: просто проявление */
+.sprite.enter-fade .sprite-body { opacity: 0; }
+.sprite.enter-fade.in .sprite-body { animation: fadeIn .6s forwards; }
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* выходы */
+.sprite.exit-fade { animation: fadeOut .5s forwards; }
+.sprite.exit-slide { animation: slideOut .5s cubic-bezier(.6,0,.8,.2) forwards; }
+@keyframes fadeOut { to { opacity: 0; filter: blur(6px); } }
+@keyframes slideOut { to { opacity: 0; transform: translateX(-300px) skewX(10deg); } }
+
+/* удар */
+.sprite.hit .sprite-body { animation: spriteHit .45s; }
+@keyframes spriteHit { 20% { transform: translateX(-24px); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(6); } 50% { transform: translateX(14px); } }
+
+/* ================= досье ================= */
+.dossier {
+  position: absolute; right: 120px; top: 110px; width: 470px; padding: 26px 28px 30px;
+  background: linear-gradient(180deg, #ebe3cc, #d6ccb0); color: #1a1712;
+  box-shadow: 0 30px 80px rgba(0,0,0,.7), inset 0 0 60px rgba(120,90,40,.25);
+  transform: translateX(700px) rotate(14deg); opacity: 0;
+  transition: transform .65s cubic-bezier(.2,.9,.3,1.15), opacity .3s;
+  font-family: var(--f-mono); z-index: 5;
+}
+.dossier.in { transform: translateX(0) rotate(2.5deg); opacity: 1; }
+.dossier.out { transform: translateX(-200px) translateY(60px) rotate(-12deg); opacity: 0; transition-duration: .45s; }
+.dossier-clip { position: absolute; top: -18px; left: 60px; width: 34px; height: 70px; border: 5px solid #8a8f94; border-radius: 16px; border-bottom: 0; }
+.dossier-head { display: flex; justify-content: space-between; font-size: 15px; letter-spacing: .1em; border-bottom: 2px solid #1a1712; padding-bottom: 8px; margin-bottom: 16px; }
+.dossier-photo {
+  position: relative; height: 290px; overflow: hidden; background:
+    repeating-linear-gradient(0deg, transparent 0 57px, rgba(0,0,0,.35) 57px 59px), #c9c3b2;
+  border: 3px solid #1a1712;
+}
+.dossier-photo img { position: absolute; left: 50%; top: -6px; width: 520px; margin-left: -260px; filter: grayscale(.85) contrast(1.15) sepia(.3); }
+.dossier-ruler { position: absolute; left: 6px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-around; font-size: 13px; font-weight: 600; opacity: .7; }
+.dossier-plate { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); background: #111; color: #eee; padding: 4px 14px; font-size: 16px; letter-spacing: .15em; }
+.dossier-name { font-family: var(--f-display); font-size: 34px; margin-top: 18px; line-height: 1.05; color: #111; }
+.dossier-role { font-size: 15px; margin-top: 6px; opacity: .8; }
+.dossier-quote { font-family: var(--f-hand); font-size: 34px; color: #9b1020; margin-top: 10px; transform: rotate(-2deg); }
+.dossier-threat { font-size: 14px; letter-spacing: .14em; margin-top: 10px; display: flex; gap: 10px; align-items: center; }
+.dossier-threat span { display: flex; gap: 4px; }
+.dossier-threat i { width: 22px; height: 10px; border: 2px solid #1a1712; }
+.dossier-threat i.on { background: #9b1020; border-color: #9b1020; }
+.dossier-stamp {
+  position: absolute; right: 18px; top: 260px; padding: 6px 16px;
+  border: 5px solid var(--s); color: var(--s); font-family: var(--f-display); font-size: 30px;
+  transform: rotate(-16deg) scale(3); opacity: 0; mix-blend-mode: multiply; filter: saturate(1.4) brightness(.8);
+  transition: transform .25s cubic-bezier(.5,0,.7,1.5), opacity .1s;
+}
+.dossier.stamped .dossier-stamp { transform: rotate(-16deg) scale(1); opacity: .9; }
+.dossier-hint { position: absolute; bottom: -34px; right: 0; font-family: var(--f-cond); font-size: 16px; color: var(--paper); letter-spacing: .2em; opacity: .6; animation: blink 1.4s infinite; }
+@keyframes blink { 50% { opacity: .15; } }
+
+/* ================= переходы ================= */
+.tr { position: absolute; inset: 0; }
+.tr-fade { background: #000; opacity: 0; transition: opacity .7s; }
+.tr-fade.cover { opacity: 1; }
+.tr-fade.reveal { opacity: 0; }
+
+.tr-blinds { display: flex; flex-direction: column; }
+.tr-blinds i { flex: 1; background: #020302; transform: scaleY(0); transform-origin: 50% 0; transition: transform .55s cubic-bezier(.7,0,.3,1); transition-delay: calc(var(--i) * 25ms); box-shadow: 0 2px 0 rgba(182,255,59,.08); }
+.tr-blinds.cover i { transform: scaleY(1.05); }
+.tr-blinds.reveal i { transform: scaleY(0); transform-origin: 50% 100%; }
+
+.tr-ink { background: #000; clip-path: circle(0% at 50% 50%); transition: clip-path .7s cubic-bezier(.7,0,.3,1); }
+.tr-ink.cover { clip-path: circle(80% at 50% 50%); }
+.tr-ink.reveal { clip-path: circle(0% at 50% 50%); background: #000; }
+.tr-ink::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, transparent 30%, rgba(182,255,59,.15) 60%, transparent 70%); }
+
+.tr-flash { background: #fff; opacity: 0; transition: opacity .2s; }
+.tr-flash.cover { opacity: 1; }
+.tr-flash.reveal { opacity: 0; transition: opacity .7s; }
+
+.tr-glitch i {
+  position: absolute; left: 0; right: 0; height: 10%; top: calc(var(--i) * 10%); background: #000;
+  transform: translateX(calc(-110% + (var(--i) * 7%))); transition: transform .45s steps(5); transition-delay: calc(var(--i) * 20ms);
+  box-shadow: 0 0 0 1px rgba(194,123,255,.4), 12px 0 0 rgba(182,255,59,.5), -12px 0 0 rgba(255,42,77,.5);
+}
+.tr-glitch.cover i { transform: translateX(0); }
+.tr-glitch.reveal i { transform: translateX(110%); }
+
+/* ================= глава ================= */
+.chapter { position: absolute; inset: 0; background: rgba(0,0,0,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity .5s; overflow: hidden; }
+.chapter.in { opacity: 1; }
+.chapter.out { opacity: 0; transition-duration: .7s; }
+.tape { position: absolute; left: -10%; width: 120%; height: 64px; background: #f2d21b; color: #111; display: flex; align-items: center; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.6); font-family: var(--f-display); font-size: 26px; white-space: nowrap; }
+.tape span { display: block; animation: tapeRun 9s linear infinite; }
+.tape-a { top: 26%; transform: translateX(-120%) rotate(-7deg); transition: transform .7s cubic-bezier(.2,.9,.3,1); }
+.tape-b { top: 64%; transform: translateX(120%) rotate(5deg); transition: transform .7s .12s cubic-bezier(.2,.9,.3,1); }
+.chapter.in .tape-a { transform: translateX(0) rotate(-7deg); }
+.chapter.in .tape-b { transform: translateX(0) rotate(5deg); }
+@keyframes tapeRun { to { transform: translateX(-50%); } }
+.chapter-kicker { font-family: var(--f-cond); letter-spacing: .6em; font-size: 28px; color: var(--acid); opacity: 0; transform: translateY(20px); transition: all .6s .4s; }
+.chapter-title { font-family: var(--f-display); font-size: 110px; text-transform: uppercase; color: var(--paper); text-shadow: 0 0 40px rgba(182,255,59,.35), 6px 6px 0 #000; opacity: 0; transform: scale(1.4); filter: blur(10px); transition: all .7s .55s cubic-bezier(.2,.9,.3,1); position: relative; z-index: 1; text-align: center; line-height: 1; max-width: 1600px; }
+.chapter.in .chapter-kicker { opacity: 1; transform: none; }
+.chapter.in .chapter-title { opacity: 1; transform: none; filter: none; }
+
+/* ================= штамп локации ================= */
+.placecard { position: absolute; left: 60px; top: 230px; z-index: 40; display: flex; gap: 16px; align-items: center; opacity: 0; transform: translateX(-30px); transition: all .5s; pointer-events: none; }
+.placecard.in { opacity: 1; transform: none; }
+.placecard.out { opacity: 0; transform: translateX(-30px); }
+.pc-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--blood); box-shadow: 0 0 18px var(--blood); animation: blink 1s infinite; }
+.pc-text { border-left: 3px solid var(--acid); padding: 6px 18px; background: linear-gradient(90deg, rgba(0,0,0,.75), transparent); }
+.pc-text b { display: block; font-family: var(--f-mono); font-size: 30px; font-weight: 600; letter-spacing: .04em; min-height: 40px; }
+.pc-text span { font-family: var(--f-mono); font-size: 18px; color: var(--acid); letter-spacing: .2em; }
