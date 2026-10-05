@@ -89,12 +89,15 @@
           v.className = 'tr-verdict ' + (ok ? 'ok' : want.size ? 'bad' : '');
           v.textContent = !want.size ? 'Выбери, что хочешь получить' : ok ? (off - pr >= 2 ? `Переплата ${Math.round((off - pr) * 10) / 10} — сдачи не будет` : 'Весы уравновешены') : `Не хватает ${Math.round((pr - off) * 10) / 10}`;
           wrap.querySelector('.tr-deal').disabled = !ok;
-          wrap.querySelector('.tr-hag').disabled = haggled;
+          const hasGoods = mine.querySelector('.tr-item');
+          const hag = wrap.querySelector('.tr-hag');
+          hag.disabled = haggled || !want.size || !hasGoods;
+          hag.title = haggled ? 'Торговаться можно один раз за визит' : !hasGoods ? 'Нечего предложить — не о чем торговаться' : !want.size ? 'Сначала выбери, что хочешь получить' : 'Успех: цены −25%. Провал: цены +25% и он запомнит наглость';
         };
 
         wrap.querySelector('.tr-hag').addEventListener('click', async (e) => {
           e.stopPropagation();
-          if (haggled) return;
+          if (haggled || e.currentTarget.disabled) return;
           haggled = true;
           const ok = await VN.Checks.run({ stat: 'nrv', dc: m.haggleDc, label: 'Сбить цену' });
           haggle = ok ? 0.75 : 1.25;

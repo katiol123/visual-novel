@@ -754,6 +754,7 @@
         lose: [{ goto: 'ending_silence' }],
       },
       { label: 'safe' },
+      { if: () => late() && f('bugaiDown'), then: [{ set: { lateFight: true } }, { goto: 'ending_late' }] },
       { hide: 'bugai' },
       { n: 'Код — дата смерти отца. {green}1-4-0-2{/green}. Я помнил её лучше, чем собственный день рождения.' },
       { sfx: 'click', wait: 400 },

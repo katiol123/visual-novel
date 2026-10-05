@@ -58,6 +58,14 @@
   const Rules = {
     evaluate,
 
+    /** Время боя: сколько игровых минут стоит один раунд в каждом акте
+        (дробное значение копится: 0.5 — минута за каждые 2 раунда).
+        В прологе до полуночи меньше часа — затянутый бой может провалить всё. */
+    MINUTES_PER_ROUND: { 0: 1.25 }, // подобрано ботом: ~1 забег из 5 опаздывает из-за боёв
+    minutesPerRound(act) { return Rules.MINUTES_PER_ROUND[act || 0] || 0; },
+    /** Сколько минут набежало за rounds сыгранных раундов. */
+    fightMinutes(rounds, act) { return Math.floor(rounds * Rules.minutesPerRound(act) + 1e-9); },
+
     /** Состояние боя. cs — боевые параметры игрока (уже с модификаторами). */
     makeState(def, cs, player, mods = []) {
       const st = {

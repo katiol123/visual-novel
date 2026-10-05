@@ -37,6 +37,7 @@
       if (e.repeat && e.code !== 'ControlLeft') return;
       const inGame = !!VN.Runner.scene && !document.querySelector('.title-screen');
       if (e.code === 'Escape') {
+        if (document.querySelector('.check')) return; // идёт проверка — сперва бросок
         if (VN.Modal.top()) { VN.Modal.close(); return; }
         if (inGame && !VN.Input.modal) VN.Saves.open();
         return;

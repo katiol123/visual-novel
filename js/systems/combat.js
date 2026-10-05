@@ -76,6 +76,7 @@
           <div class="cb-res"></div>
           <div class="cb-mods">${this.mods.map((m) => `<span class="${m.kind}" title="${m.desc}">${m.name}</span>`).join('')}</div>
           <div class="cb-pstatus"></div>
+          ${Rules.minutesPerRound(VN.S.act) ? `<div class="cb-clock" title="Бой идёт в реальном времени ночи: каждый раунд отнимает минуты до полуночи"></div>` : ''}
         </div>
         <div class="cb-table">
           <div class="cb-tray" data-zone="tray"><label>ЛОТОК · кубы здесь можно перебросить</label><div class="zone"></div></div>
@@ -199,6 +200,7 @@
       stage(5); if (!skipped) VN.Audio.sfx('shutter');
       await wait(380);
       this.build();
+      this.pinIntent();
       window.removeEventListener('keydown', onKey, true);
       vs.classList.add('out');
       this.root.classList.add('in');
@@ -722,7 +724,33 @@
       await sleep(500);
     }
 
+    /** Окно намерения всегда под панелью противника: пассивки и статусы
+        растут вниз — окно съезжает следом и никогда их не перекрывает. */
+    pinIntent() {
+      const ep = this.$('.cb-epanel'), it = this.$('.cb-intent');
+      if (!ep || !it) return;
+      const place = () => { it.style.top = Math.max(230, ep.offsetTop + ep.offsetHeight + 10) + 'px'; };
+      place();
+      if (window.ResizeObserver) { this.ro = new ResizeObserver(place); this.ro.observe(ep); }
+    }
+
+    /** Часы боя: сыгранные раунды съедают минуты до полуночи. */
+    tickClock() {
+      const box = this.$('.cb-clock');
+      if (!Rules.minutesPerRound(VN.S.act) || !box) return;
+      const due = Rules.fightMinutes(this.st.round, VN.S.act) - (this.clockMin || 0);
+      if (due > 0) {
+        this.clockMin = (this.clockMin || 0) + due;
+        VN.State.addTime(due);
+        this.pop(box, `+${due} МИН`, 'guard');
+      }
+      const left = VN.State.minutesLeft();
+      box.className = 'cb-clock' + (left <= 10 ? ' hot' : '');
+      box.innerHTML = `⏱ <b>${VN.State.clock()}</b> · до полуночи <b>${left}</b> мин`;
+    }
+
     async nextRound() {
+      this.tickClock();
       // убрать кубы со стола
       this.dice.forEach((o) => o.d.el.animate([{ opacity: 1 }, { opacity: 0, transform: 'scale(0.6)' }], { duration: 200, fill: 'forwards' }));
       this.$('.cb-intent').classList.remove('show');
@@ -739,6 +767,7 @@
 
     async finish(result) {
       this.phase = 'end';
+      this.tickClock();
       this.updateRes();
       VN.Audio.combatMusic(false);
       const words = { win: ['ЧИСТО', 'противник повержен'], lose: ['НОКАУТ', 'ты на асфальте'], fled: ['УШЁЛ', 'не сегодня'] };
@@ -755,6 +784,7 @@
         if (VN.mode.skip) setTimeout(res, 700);
       });
       window.removeEventListener('keydown', this.keys, true);
+      if (this.ro) this.ro.disconnect();
       VN.S.hp = clamp(this.player.hp, 0, VN.S.maxHp);
       VN.bus.emit('state');
       this.root.classList.add('out');

@@ -61,10 +61,14 @@
       });
 
       const side = el('div', 'board-side');
-      const clues = Object.keys(VN.Clues).filter((k) => S.flags[k]);
+      const note = (k, i) => `<div class="note${(VN.Clues[k].act || 0) < act ? ' old' : ''}" style="--r:${(i % 3) - 1}deg"><b>${VN.Clues[k].title}</b>${VN.Clues[k].text}</div>`;
+      const own = VN.cluesFor(act).filter((k) => (VN.Clues[k].act || 0) === act);
+      const found = own.filter((k) => S.flags[k]);
+      const carried = VN.cluesFor(act).filter((k) => (VN.Clues[k].act || 0) < act && S.flags[k]);
       side.innerHTML = `
-        <h3>УЛИКИ <small>${clues.length}/${Object.keys(VN.Clues).length}</small></h3>
-        <div class="notes">${clues.length ? clues.map((k, i) => `<div class="note" style="--r:${(i % 3) - 1}deg"><b>${VN.Clues[k].title}</b>${VN.Clues[k].text}</div>`).join('') : '<p class="muted">Пока пусто. Задавай вопросы.</p>'}</div>
+        <h3>УЛИКИ${act ? ' · ГЛАВА I' : ''} <small>${found.length}/${own.length}</small></h3>
+        <div class="notes">${found.length ? found.map(note).join('') : '<p class="muted">Пока пусто. Задавай вопросы.</p>'}</div>
+        ${carried.length ? `<h3>ИЗ ПРОЛОГА <small>ещё сработают</small></h3><div class="notes">${carried.map(note).join('')}</div>` : ''}
         ${(() => {
           const met = Object.keys(S.met).filter((id) => VN.Characters[id]);
           if (!met.length || !act) return '';

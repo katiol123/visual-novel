@@ -178,7 +178,8 @@
         const actEnds = Object.entries(VN.Endings).filter(([, x]) => (x.act || 0) === act);
         const gotEnds = actEnds.filter(([k]) => VN.Meta.data.endings[k]).length;
         if (e.next) { S.flags.prologueEnding = id; VN.State.saveActStart(1); }
-        const clues = Object.keys(VN.Clues).filter((k) => S.flags[k]).length;
+        const actClues = Object.keys(VN.Clues).filter((k) => (VN.Clues[k].act || 0) === act);
+        const clues = actClues.filter((k) => S.flags[k]).length;
         const s = el('div', 'screen ending');
         s.style.setProperty('--c', e.color);
         s.innerHTML = `
@@ -188,7 +189,7 @@
           <div class="en-stats">
             <div><b>${VN.State.clock()}</b><span>время</span></div>
             <div><b>${blocks}/${total}</b><span>блоков пройдено</span></div>
-            <div><b>${clues}/${Object.keys(VN.Clues).length}</b><span>улик</span></div>
+            <div><b>${clues}/${actClues.length}</b><span>улик</span></div>
             <div><b>${gotEnds}/${actEnds.length}</b><span>концовок ${act ? 'главы' : 'пролога'}</span></div>
           </div>
           <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act ? 'ГЛАВА II — СКОРО' : 'Этот путь обрывается здесь'}</div>

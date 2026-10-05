@@ -236,3 +236,6 @@
 .tr-btns { display: flex; gap: 12px; }
 .tr-btns .btn { font-size: 20px; padding: 12px 22px; }
 .tr-refuse { padding: 80px; text-align: center; font-family: var(--f-hand); font-size: 46px; color: #ff6b80; }
+
+/* улики прошлого акта — бледнее, но на месте */
+.board-side .note.old { opacity: .78; filter: sepia(.35); }
