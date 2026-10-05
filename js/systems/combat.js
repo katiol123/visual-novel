@@ -71,7 +71,11 @@
           <div class="cb-bubble"></div>
         </div>
         <div class="cb-epanel">
-          <div class="cb-ename">${d.name}${this.enemy.armor ? `<span class="armor" title="Броня: снижает урон УДАРА">🛡 ${this.enemy.armor}</span>` : ''}</div>
+          <div class="cb-ename">${d.name}</div>
+          <div class="cb-estats">
+            <span title="Прибавка к сумме кубов в атаках противника">АТАКА <b>${this.atkText()}</b></span>
+            <span title="Броня: снижает урон твоего УДАРА">БРОНЯ <b>${this.enemy.armor || 0}</b></span>
+          </div>
           <div class="cb-bar enemy"><i class="lag"></i><i class="fill"></i><span></span></div>
           <div class="cb-estatus"></div>
         </div>
@@ -79,6 +83,7 @@
           <div class="it-label">НАМЕРЕНИЕ</div>
           <div class="it-name">…</div>
           <div class="it-dice"></div>
+          <div class="it-formula"></div>
           <div class="it-value"></div>
           <div class="it-desc"></div>
         </div>
@@ -158,7 +163,7 @@
           <div class="ci-name">${d.name}</div>
           <div class="ci-threat"><span>УГРОЗА</span>${[1, 2, 3, 4, 5].map((n) => `<i class="${n <= threat ? 'on' : ''}" style="--n:${n}"></i>`).join('')}</div>
           ${row('ЗДОРОВЬЕ', `${this.enemy.hp}/${this.enemy.maxHp}`)}${bar(this.enemy.hp, this.enemy.maxHp)}
-          ${row('БРОНЯ', this.enemy.armor || '—')}${d.hidden ? row('СКРЫТЫЕ КУБЫ', '?'.repeat(d.hidden)) : ''}
+          ${row('АТАКА', this.atkText())}${row('БРОНЯ', this.enemy.armor || '—')}${d.hidden ? row('СКРЫТЫЕ КУБЫ', '?'.repeat(d.hidden)) : ''}
         </div>
         <div class="ci-crack"></div>
         <div class="ci-vs"><i class="ring"></i><i class="ring r2"></i><b>VS</b></div>
@@ -220,7 +225,7 @@
         h.innerHTML = `<div class="hc">
           <h3>КОСТИ НА СУКНЕ</h3>
           <ol>
-            <li><b>Противник ходит открыто.</b> Его кубы — это его НАМЕРЕНИЕ: сколько урона он нанесёт или сколько заблокирует.</li>
+            <li><b>Противник ходит открыто.</b> Его кубы — это его НАМЕРЕНИЕ: сколько урона он нанесёт или сколько заблокирует. Урон = кубы + его АТАКА (указана под полосой здоровья).</li>
             <li><b>Разложи свои кубы.</b> <span class="c-atk">УДАР</span> бьёт, <span class="c-blk">БЛОК</span> гасит входящий урон, <span class="c-shot">ВЫСТРЕЛ</span> — один куб ×2 сквозь броню (нужен патрон).</li>
             <li><b>Комбинации в УДАРЕ:</b> пара — ДУПЛЕТ +3, две пары +6, три подряд — СТРИТ +5, три одинаковых — ТРОЙКА ×2.</li>
             <li><b>Шестёрка в БЛОКЕ</b> — КОНТРА: противник получит 3 урона, если ударит. Шестёрка в ВЫСТРЕЛЕ — В ЯБЛОЧКО: 15.</li>
@@ -353,7 +358,30 @@
       this.updateBars();
     }
 
+    /** Диапазон прибавки атаки по всем атакующим приёмам: «+4» или «+4…+7». */
+    atkText() {
+      const b = this.def.moves.filter((m) => m.type === 'attack' || m.type === 'barrage').map((m) => m.bonus || 0);
+      if (!b.length) return '—';
+      const lo = Math.min(...b), hi = Math.max(...b);
+      return lo === hi ? `+${lo}` : `+${lo}…+${hi}`;
+    }
+
+    /** Расшифровка намерения: «кубы 7 + атака 4». */
+    renderFormula() {
+      const it = this.enemy.intent, m = it.move, f = this.$('.it-formula');
+      if (m.type === 'charge' || this.enemy.stunned) { f.innerHTML = ''; return; }
+      const bonus = m.bonus || 0;
+      const dice = it.value - bonus;
+      const shown = it.vals.length - it.nHidden; // сколько кубов видно
+      const q = '?'.repeat(it.nHidden).split('').join(' + ');
+      const diceTxt = it.revealed ? dice : shown > 0 ? `${dice - it.hiddenSum} + ${q}` : q;
+      const what = m.type === 'guard' ? 'ЗАЩИТА' : 'АТАКА';
+      const note = m.type === 'barrage' ? ' <em>(1–2 мимо)</em>' : '';
+      f.innerHTML = `кубы <b>${diceTxt}</b>${note}${bonus ? ` + ${what} <b>${bonus}</b>` : ''}`;
+    }
+
     renderIntentValue() {
+      this.renderFormula();
       const it = this.enemy.intent, m = it.move;
       const lab = m.type === 'guard' ? 'БЛОК' : m.type === 'charge' ? 'ГОТОВИТСЯ' : 'УРОН';
       const box = this.$('.it-value');
@@ -570,6 +598,7 @@
         VN.Audio.sfx('firework'); VN.Fx.flash('#fff', 250); VN.Fx.shake(14);
         this.$('.it-dice').querySelectorAll('.die').forEach((d) => d.classList.add('shatter'));
         this.$('.it-value').innerHTML = '<b>0</b><span>ОГЛУШЁН</span>';
+        this.$('.it-formula').innerHTML = '';
         this.say('А-А-А! ГЛАЗА!');
         await this.banner('БА-БАХ!', 'противник оглушён', 'gold');
       }

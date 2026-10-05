@@ -280,3 +280,12 @@
 @keyframes coverIn { from { transform: rotateY(90deg) scale(.8); opacity: 0; } }
 @keyframes coverOut { 50% { transform: rotateY(90deg) scale(1.1); opacity: 1; } to { transform: rotateY(90deg); opacity: 0; } }
 .it-value b .q { font-style: normal; font-size: .55em; color: #ffd0d8; margin-left: 4px; vertical-align: super; animation: blink 1.4s infinite; }
+
+/* статы противника и расшифровка намерения */
+.cb-estats { display: flex; justify-content: flex-end; gap: 22px; margin-top: 10px; font-family: var(--f-cond); font-size: 17px; letter-spacing: .16em; color: var(--muted); }
+.cb-estats b { font-family: var(--f-mono); font-size: 19px; color: var(--paper); margin-left: 6px; letter-spacing: 0; }
+.cb-estats span:first-child b { color: #ff6b80; }
+.it-formula { font-family: var(--f-cond); font-size: 19px; letter-spacing: .1em; color: #c9b8b8; margin: -4px 0 8px; min-height: 24px; }
+.it-formula b { font-family: var(--f-mono); color: var(--paper); font-size: 20px; letter-spacing: 0; }
+.it-formula em { font-style: normal; color: var(--muted); font-size: 16px; }
+.t-guard .it-formula b { color: var(--ice); }

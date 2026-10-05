@@ -42,7 +42,7 @@
   VN.State = {
     STATS, DEADLINE,
 
-    reset() { VN.S = fresh(); VN.bus.emit('state:reset'); return VN.S; },
+    reset() { VN.S = fresh(); VN.bus.emit('state:reset'); VN.bus.emit('state'); return VN.S; },
 
     /* ---- инвентарь ---- */
     has(id, n = 1) { return (VN.S.inv[id] || 0) >= n; },
