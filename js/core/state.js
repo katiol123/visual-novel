@@ -125,6 +125,7 @@
         atkBonus,
         blkBonus: bg === 'boxer' || bg === 'cop' ? 1 : 0,
         gun: this.has('revolver'),
+        shotMult: 3, // ВЫСТРЕЛ: куб ×3, шестёрка — 18 сквозь защиту
       };
     },
 

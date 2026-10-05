@@ -49,7 +49,8 @@
     let blk = blkV.reduce((a, b) => a + b, 0);
     if (blkV.length) blk += ctx.blkBonus;
     const counter = blkV.includes(6);
-    const shot = shotV.length ? (shotV[0] === 6 ? 15 : shotV[0] * 2) : 0;
+    const mult = ctx.shotMult || 2;
+    const shot = shotV.length ? (shotV[0] === 6 ? Math.max(15, 6 * mult) : shotV[0] * mult) : 0;
     return { atk, blk, shot, counter, combos, bullseye: shotV[0] === 6 };
   }
 
@@ -61,7 +62,7 @@
     /** Время боя: сколько игровых минут стоит один раунд в каждом акте
         (дробное значение копится: 0.5 — минута за каждые 2 раунда).
         В прологе до полуночи меньше часа — затянутый бой может провалить всё. */
-    MINUTES_PER_ROUND: { 0: 1.25 }, // подобрано ботом: ~1 забег из 5 опаздывает из-за боёв
+    MINUTES_PER_ROUND: { 0: 1.25, 1: 1.25 }, // пролог подобран ботом: ~1 забег из 5 опаздывает из-за боёв
     minutesPerRound(act) { return Rules.MINUTES_PER_ROUND[act || 0] || 0; },
     /** Сколько минут набежало за rounds сыгранных раундов. */
     fightMinutes(rounds, act) { return Math.floor(rounds * Rules.minutesPerRound(act) + 1e-9); },

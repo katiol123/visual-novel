@@ -83,7 +83,7 @@
           <div class="cb-slots">
             <div class="slot s-atk" data-zone="atk"><header>УДАР <em>+${this.cs.atkBonus}</em></header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer></div>
             <div class="slot s-blk" data-zone="blk"><header>БЛОК ${this.cs.blkBonus ? `<em>+${this.cs.blkBonus}</em>` : ''}</header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer></div>
-            <div class="slot s-shot" data-zone="shot"><header>ВЫСТРЕЛ <em>×2</em></header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer><div class="slot-lock"></div></div>
+            <div class="slot s-shot" data-zone="shot"><header>ВЫСТРЕЛ <em>×${this.cs.shotMult || 2}</em></header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer><div class="slot-lock"></div></div>
           </div>
         </div>
         <div class="cb-forecast"></div>
@@ -216,7 +216,7 @@
           <h3>КОСТИ НА СУКНЕ</h3>
           <ol>
             <li><b>Противник ходит открыто.</b> Его кубы — это его НАМЕРЕНИЕ: сколько урона он нанесёт или сколько заблокирует. Урон = кубы + его АТАКА (указана под полосой здоровья).</li>
-            <li><b>Разложи свои кубы.</b> <span class="c-atk">УДАР</span> бьёт, <span class="c-blk">БЛОК</span> гасит входящий урон, <span class="c-shot">ВЫСТРЕЛ</span> — один куб ×2 сквозь броню (нужен патрон).</li>
+            <li><b>Разложи свои кубы.</b> <span class="c-atk">УДАР</span> бьёт, <span class="c-blk">БЛОК</span> гасит входящий урон, <span class="c-shot">ВЫСТРЕЛ</span> — один куб ×3 сквозь броню, шестёрка — 18 (нужен патрон).</li>
             <li><b>Комбинации в УДАРЕ:</b> пара — ДУПЛЕТ +3, две пары +6, три подряд — СТРИТ +5, три одинаковых — ТРОЙКА ×2.</li>
             <li><b>Шестёрка в БЛОКЕ</b> — КОНТРА: противник получит 3 урона, если ударит. Шестёрка в ВЫСТРЕЛЕ — В ЯБЛОЧКО: 15.</li>
             <li><b>Кубы с «?»</b> — противник скрывает их до удара. Видна только часть урона: ставь блок с запасом.</li>
@@ -253,6 +253,7 @@
       const es = [];
       if (this.enemy.guard) es.push(`<span class="st guard">БЛОК ${this.enemy.guard}</span>`);
       if (this.enemy.stunned) es.push('<span class="st stun">ОГЛУШЁН</span>');
+      if (this.enemy.dazed) es.push('<span class="st stun">ОСЛЕПЛЁН</span>');
       this.$('.cb-estatus').innerHTML = es.join('');
     }
 
@@ -509,19 +510,20 @@
       set('shot', r.shot, r.bullseye ? '<i>В ЯБЛОЧКО</i>' : '');
       const it = this.enemy.intent;
       const attacking = it && !this.enemy.stunned && (it.move.type === 'attack' || it.move.type === 'barrage');
-      const incoming = attacking ? it.value : 0;
+      const half = (x) => (this.enemy.dazed ? Math.floor(x / 2) : x);
+      const incoming = attacking ? half(it.value) : 0;
       const dealt = Math.max(0, r.atk - this.enemy.guard - this.enemy.armor) * (v.atk.length ? 1 : 0) + r.shot;
       const taken = Math.max(0, incoming - r.blk);
       let takenTxt = String(taken), takenMax = taken;
       if (attacking && it.alt != null) {
-        const a = Math.max(0, it.alt - r.blk);
+        const a = Math.max(0, half(it.alt) - r.blk);
         takenMax = Math.max(taken, a);
         takenTxt = `${Math.min(taken, a)}–${takenMax}`;
       }
       if (attacking && !it.revealed) {
         // диапазон по скрытым кубам: шквал считает 1–2 промахом
         const seen = it.value - it.hiddenSum;
-        const lo = seen + it.nHidden * (it.move.type === 'barrage' ? 0 : 1), hi = seen + it.nHidden * 6;
+        const lo = half(seen + it.nHidden * (it.move.type === 'barrage' ? 0 : 1)), hi = half(seen + it.nHidden * 6);
         const tLo = Math.max(0, lo - r.blk);
         takenMax = Math.max(0, hi - r.blk);
         takenTxt = tLo === takenMax ? String(tLo) : `${tLo}–${takenMax}`;
@@ -578,17 +580,25 @@
         const before = this.player.hp;
         this.player.hp = Math.min(this.player.maxHp, this.player.hp + it.heal);
         this.pop(this.$('.cb-ppanel'), '+' + (this.player.hp - before), 'heal');
+        if (it.cleanse && (this.player.bleed || this.player.burn || this.player.poison)) {
+          this.player.bleed = this.player.burn = this.player.poison = 0;
+          await this.banner('ПЕРЕВЯЗКА', 'кровь, ожог и яд сняты', 'gold');
+        }
       }
       if (it.reveal) { await this.revealHidden(); await this.banner('ВСКРЫТО', 'все кубы противника на виду', 'gold'); }
-      if (id === 'flask') { this.rerolls += 2; this.maxRerolls += 2; await this.banner('ГЛОТОК', '+2 переброса', 'gold'); }
+      if (id === 'flask') {
+        this.rerolls += 2; this.maxRerolls += 2;
+        // лишний куб в лоток — второе дыхание
+        const d = VN.Dice.make(1, 'bone'), o = { d, zone: 'tray' };
+        this.zones.tray.appendChild(d.el); this.bindDie(o); this.dice.push(o);
+        await d.roll(VN.Dice.d6(), { from: { x: -380, y: 260 } });
+        await this.banner('ГЛОТОК', '+1 куб и +2 переброса', 'gold');
+      }
       if (id === 'firecracker') {
-        this.enemy.stunned = true; this.enemy.guard = 0;
+        this.enemy.dazed = true; this.enemy.guard = 0;
         VN.Audio.sfx('firework'); VN.Fx.flash('#fff', 250); VN.Fx.shake(14);
-        this.$('.it-dice').querySelectorAll('.die').forEach((d) => d.classList.add('shatter'));
-        this.$('.it-value').innerHTML = '<b>0</b><span>ОГЛУШЁН</span>';
-        this.$('.it-formula').innerHTML = '';
         this.say('А-А-А! ГЛАЗА!');
-        await this.banner('БА-БАХ!', 'противник оглушён', 'gold');
+        await this.banner('БА-БАХ!', 'противник ослеп: его удар вдвое слабее, блока нет', 'gold');
       }
       this.updateBars(); this.preview(); this.updateRes();
     }
@@ -606,7 +616,7 @@
         VN.Audio.sfx('gunshot'); VN.Fx.flash('#fff6d0', 200); VN.Fx.shake(16, 400);
         this.root.classList.add('muzzle'); setTimeout(() => this.root.classList.remove('muzzle'), 200);
         await sleep(160);
-        if (r.bullseye) await this.banner('В ЯБЛОЧКО', '15 урона сквозь защиту', 'gold');
+        if (r.bullseye) await this.banner('В ЯБЛОЧКО', `${r.shot} урона сквозь защиту`, 'gold');
         this.hitEnemy(r.shot, 'shot');
         await this.applyLog(Rules.afterEnemyHit(this.st, r.shot, 'shot'));
         await sleep(500);
@@ -692,7 +702,8 @@
         [{ transform: 'translate(0,0)' }, { transform: `translate(${-500 - i * 40}px, 120px) scale(0.6)`, opacity: 0.2 }],
         { duration: 300, easing: 'cubic-bezier(.5,0,1,.5)', fill: 'forwards' }));
       await sleep(260);
-      const incoming = Rules.realIncoming(this.st);
+      let incoming = Rules.realIncoming(this.st);
+      if (this.enemy.dazed && incoming > 0) { incoming = Math.floor(incoming / 2); await this.banner('ОСЛЕПЛЁН', `бьёт наугад: урон ${incoming}`, 'gold'); }
       if (it.missed) { this.say(pick(['Мимо!..', 'Где ты?!', 'Стой ровно!'])); await this.banner('ПЬЯНЫЙ ПРИЦЕЛ', 'мимо', 'acid'); }
       if (it.alt != null) { this.$('.it-value').innerHTML = `<b>${incoming}</b><span>НАСТОЯЩАЯ КНИГА</span>`; await this.banner('НАСТОЯЩАЯ КНИГА', `урон ${incoming}`, 'bad'); }
       const blocked = Math.min(incoming, r.blk);
@@ -746,11 +757,12 @@
       }
       const left = VN.State.minutesLeft();
       box.className = 'cb-clock' + (left <= 10 ? ' hot' : '');
-      box.innerHTML = `⏱ <b>${VN.State.clock()}</b> · до полуночи <b>${left}</b> мин`;
+      box.innerHTML = `⏱ <b>${VN.State.clock()}</b> · ${(VN.S.clock && VN.S.clock.label) || 'до полуночи'} <b>${left}</b> мин`;
     }
 
     async nextRound() {
       this.tickClock();
+      this.enemy.dazed = false;
       // убрать кубы со стола
       this.dice.forEach((o) => o.d.el.animate([{ opacity: 1 }, { opacity: 0, transform: 'scale(0.6)' }], { duration: 200, fill: 'forwards' }));
       this.$('.cb-intent').classList.remove('show');

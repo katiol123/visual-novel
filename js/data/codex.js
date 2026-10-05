@@ -52,6 +52,7 @@
     late: { act: 0, next: 'a1_start', title: 'ОПОЗДАЛ', color: '#ff2a4d', sub: 'Куранты пробили раньше.' },
     cell: { act: 0, next: 'a1_start', title: 'РЕШЁТКА', color: '#c9d4c2', sub: 'Новый год за решёткой Участка 13.' },
     silence: { act: 0, title: 'ТИШИНА', color: '#ff2a4d', sub: 'Ян Корсак не встретил Новый год.' },
+    lastround: { act: 0, title: 'ПОСЛЕДНИЙ ПАТРОН', color: '#8a9488', sub: 'Счёт закрыт. Не тот, который он хотел закрыть.' },
   };
 
   VN.Backgrounds = {

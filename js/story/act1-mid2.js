@@ -109,6 +109,30 @@
       { set: { v_den: true } },
       { bg: 'den', trans: 'glitch' },
       { place: 'Подвал под Кривым переулком' },
+      /* Скрытые последствия: как ты обошёлся с Сорокой, решает, кто ждёт тебя в переулке. */
+      { if: () => St.foe('soroka') && !foe('shilo'), then: [
+        { n: 'Свиста не было. {pause=400}Это было хуже любого свиста.' },
+        { show: 'shilo', at: 'center', enter: 'drop' },
+        { shilo: 'Сеструха пришла домой в слезах, Корсак. Сказала, кто. {pause=300}Сказала, как.' },
+        { shilo: 'Ты мне тогда мандарины, а ей — вот это? {pause=300}Нет. Сегодня у нас с тобой другие расчёты.' },
+        { rel: { shilo: -3 }, quiet: true },
+        {
+          combat: 'shilo_a1', flee: true, opts: mods('grudge'),
+          win: [{ shilo: '{whisper}…Она ведь тебе поверила. Хоть на секунду.{/whisper}' }, { n: 'Он не встал. Я тоже не стал ждать.' }, { hide: 'shilo' }, { time: 10 }, back],
+          lose: [{ n: 'Очнулся я на ступенях. Карманы — пустые. На груди нацарапано ножом по куртке: «за сестру».' }, { run: () => { Object.keys(VN.S.inv).filter((i) => VN.Items[i].tradeable).slice(0, 2).forEach((i) => VN.State.take(i, 1)); } }, { sethp: 6 }, { time: 25 }, { hide: 'shilo' }, back],
+          fled: [{ hide: 'shilo' }, back],
+        },
+      ] },
+      { if: () => St.friend('soroka') && !f('sorokaShopSeen'), then: [
+        { set: { sorokaShopSeen: true } },
+        { n: 'У входа в подвал, на перевёрнутом ящике, был разложен целый прилавок. Патроны, зеркальце, шприц в упаковке, петарды.' },
+        { show: 'soroka', at: 'left', enter: 'fade' },
+        { soroka: 'Корсак! Я тут… немножко поторговываю. Всё краденое, но краденое честно. {pause=300}Тебе — по-родственному.' },
+        { shop: 'soroka' },
+        { soroka: 'Брат внизу. Он сегодня добрый — я ему про крышу рассказала.' },
+        { rel: { shilo: 1 }, quiet: true },
+        { hide: 'soroka' },
+      ] },
       { n: 'Свист я услышал раньше, чем открыл дверь.' },
       { show: 'shilo', at: 'center', enter: 'drop' },
       {

@@ -57,6 +57,27 @@
       },
     },
 
+    soroka: {
+      char: 'soroka', haggleDc: 6, refuseFoe: true,
+      greet: 'Тс-с. Всё краденое — значит, ничьё. Бери, пока не вернулись хозяева.',
+      likes: { cigs: 2, mandarin: 2, banana: 1.5, shilo_knife: 3 },
+      dislikes: { vodka: 0.5 },
+      stock: [
+        { id: 'bullet', price: 3, qty: 2 },
+        { id: 'mirror', price: 4, qty: 1 },
+        { id: 'syringe', price: 4, qty: 1 },
+        { id: 'firecracker', price: 2, qty: 2 },
+      ],
+      lines: {
+        deal: ['Приятно иметь дело с честным человеком. Редкость.', 'Только брату не говори, почём отдала.'],
+        short: 'Мало. Я, конечно, добрая, но не настолько.',
+        win: 'Ладно-ладно. Для того, кто меня с крыши снял.',
+        lose: 'Ой, всё. Теперь дороже.',
+        friend: 'Тебе — по-родственному.',
+        foe: 'Тебе? Ничего. Никогда.',
+      },
+    },
+
     prof: {
       char: 'prof', haggleDc: 10, refuseFoe: true,
       greet: 'Я не беру деньги, Корсак. Деньги отслеживаются. Вещи — нет.',
