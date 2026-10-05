@@ -100,13 +100,14 @@
     combatStats() {
       const S = VN.S, bg = S.background;
       let atkBonus = Math.max(0, S.stats.str - 1);
-      if (this.has('knuckles')) atkBonus += 2;
+      if (this.has('knuckles')) atkBonus += 1;
+      if (bg === 'cop') atkBonus += 2; // выучка опера
       if (this.has('frog_knife')) atkBonus += 1;
       return {
         dice: 3 + (bg === 'thief' ? 1 : 0),
-        rerolls: 1 + (bg === 'cop' ? 1 : 0),
+        rerolls: 1 + (bg === 'cop' ? 2 : 0),
         atkBonus,
-        blkBonus: bg === 'boxer' ? 1 : 0,
+        blkBonus: bg === 'boxer' || bg === 'cop' ? 1 : 0,
         gun: this.has('revolver'),
       };
     },

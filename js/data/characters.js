@@ -32,7 +32,7 @@
       dossier: {
         no: '0013', role: 'Капитан полиции · 24 года в органах',
         quote: 'Закон в этом районе — это он.',
-        threat: 4, stamp: 'ПОЛИЦИЯ', stampColor: '#7fd6ff',
+        threat: 3, stamp: 'ПОЛИЦИЯ', stampColor: '#7fd6ff',
       },
     },
 
@@ -42,7 +42,7 @@
       dossier: {
         no: '2424', role: 'Владелец шаурмичной · кассир БНК',
         quote: 'Режет мясо. И не только.',
-        threat: 3, stamp: 'БНК', stampColor: '#ff2a4d',
+        threat: 2, stamp: 'БНК', stampColor: '#ff2a4d',
       },
     },
 
@@ -52,7 +52,7 @@
       dossier: {
         no: '6613', role: 'Уличный грабитель · два ножа, ноль тормозов',
         quote: 'Квакает перед ударом.',
-        threat: 3, stamp: 'ОПАСЕН', stampColor: '#8dff6a',
+        threat: 1, stamp: 'ОПАСЕН', stampColor: '#8dff6a',
       },
     },
 

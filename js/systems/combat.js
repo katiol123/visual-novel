@@ -11,6 +11,9 @@
       Кубы в лотке можно перебросить (число перебросов ограничено).
    3. Комбинации в УДАРЕ: ДУПЛЕТ (+3), ДВЕ ПАРЫ (+6), СТРИТ (+5), ТРОЙКА (×2).
    4. Удар → ответ противника → эффекты (кровотечение, ожог, наручники).
+   5. СКРЫТЫЙ КУБ: у атак противника часть кубов (def.hidden) лежит рубашкой
+      вверх — видно только «7 + ?». Куб вскрывается в момент удара.
+      Предмет с флагом reveal вскрывает их заранее.
    ========================================================================== */
 (function () {
   'use strict';
@@ -155,6 +158,7 @@
             <li><b>Разложи свои кубы.</b> <span class="c-atk">УДАР</span> бьёт, <span class="c-blk">БЛОК</span> гасит входящий урон, <span class="c-shot">ВЫСТРЕЛ</span> — один куб ×2 сквозь броню (нужен патрон).</li>
             <li><b>Комбинации в УДАРЕ:</b> пара — ДУПЛЕТ +3, две пары +6, три подряд — СТРИТ +5, три одинаковых — ТРОЙКА ×2.</li>
             <li><b>Шестёрка в БЛОКЕ</b> — КОНТРА: противник получит 3 урона, если ударит. Шестёрка в ВЫСТРЕЛЕ — В ЯБЛОЧКО: 15.</li>
+            <li><b>Кубы с «?»</b> — противник скрывает их до удара. Видна только часть урона: ставь блок с запасом.</li>
             <li><b>Не нравится бросок?</b> Кубы, оставшиеся в лотке, можно перебросить. Предмет — один за раунд.</li>
           </ol>
           <button class="btn btn-acid">ПОНЯЛ</button></div>`;
@@ -257,21 +261,61 @@
         VN.Audio.sfx('dice');
         await Promise.all(ds.map((d) => { const v = VN.Dice.d6(); vals.push(v); return d.roll(v, { from: { x: 120, y: -120 }, dur: 800 }); }));
         if (m.type === 'barrage') ds.forEach((d) => { if (d.value <= 2) d.el.classList.add('miss'); });
+        this.intentDice = ds;
       }
       let value = 0;
       if (m.type === 'attack') value = vals.reduce((a, b) => a + b, 0) + (m.bonus || 0);
       if (m.type === 'barrage') value = vals.filter((v) => v > 2).reduce((a, b) => a + b, 0) + (m.bonus || 0);
       if (m.type === 'guard') value = vals.reduce((a, b) => a + b, 0) + (m.bonus || 0);
       const pair = vals.length >= 2 && new Set(vals).size < vals.length;
-      this.enemy.intent = { move: m, value, pair, vals };
+      // скрытые кубы: только у атак, первые def.hidden кубов
+      const nHidden = (m.type === 'attack' || m.type === 'barrage') ? Math.min(this.def.hidden || 0, vals.length) : 0;
+      const hiddenSum = vals.slice(0, nHidden).reduce((a, v) => a + (m.type === 'barrage' && v <= 2 ? 0 : v), 0);
+      this.enemy.intent = { move: m, value, pair, vals, nHidden, hiddenSum, revealed: nHidden === 0 };
+      for (let i = 0; i < nHidden; i++) {
+        const d = this.intentDice[i];
+        d.el.classList.remove('miss');
+        d.el.appendChild(el('i', 'die-cover', '?'));
+        d.el.classList.add('hidden-die');
+      }
       this.enemy.guard = m.type === 'guard' ? value : 0;
       this.enemy.lastType = m.type;
       if (m.type === 'charge') this.enemy.next = m.next;
-      const lab = m.type === 'guard' ? 'БЛОК' : m.type === 'charge' ? 'ГОТОВИТСЯ' : 'УРОН';
-      this.$('.it-value').innerHTML = m.type === 'charge' ? `<b>!</b><span>${lab}</span>` : `<b>${value}</b><span>${lab}${pair && m.pairEffect ? ' · ПАРА!' : ''}</span>`;
+      this.renderIntentValue();
       box.classList.add('show');
       if (Math.random() < 0.6) this.say(pick(this.def.taunts));
       this.updateBars();
+    }
+
+    renderIntentValue() {
+      const it = this.enemy.intent, m = it.move;
+      const lab = m.type === 'guard' ? 'БЛОК' : m.type === 'charge' ? 'ГОТОВИТСЯ' : 'УРОН';
+      const box = this.$('.it-value');
+      if (m.type === 'charge') { box.innerHTML = `<b>!</b><span>${lab}</span>`; return; }
+      if (!it.revealed) {
+        const seen = it.value - it.hiddenSum;
+        box.innerHTML = `<b>${seen}<i class="q">+${'?'.repeat(it.nHidden)}</i></b><span>${lab}</span>`;
+        return;
+      }
+      box.innerHTML = `<b>${it.value}</b><span>${lab}${it.pair && m.pairEffect ? ' · ПАРА!' : ''}</span>`;
+    }
+
+    /** Вскрыть скрытые кубы намерения (при ударе или предметом с reveal). */
+    async revealHidden() {
+      const it = this.enemy.intent;
+      if (!it || it.revealed) return;
+      it.revealed = true;
+      (this.intentDice || []).forEach((d, i) => {
+        if (i >= it.nHidden) return;
+        const c = d.el.querySelector('.die-cover');
+        d.el.classList.remove('hidden-die');
+        if (c) { c.classList.add('flip'); setTimeout(() => c.remove(), 450); }
+        if (it.move.type === 'barrage' && d.value <= 2) d.el.classList.add('miss');
+      });
+      VN.Audio.sfx('flash');
+      this.renderIntentValue();
+      if (this.phase === 'assign') this.preview();
+      await sleep(VN.mode.skip ? 100 : 550);
     }
 
     async playerRoll() {
@@ -387,10 +431,20 @@
       set('blk', v.blk.length ? r.blk : 0, r.counter ? '<i>КОНТРА 3</i>' : '');
       set('shot', r.shot, r.bullseye ? '<i>В ЯБЛОЧКО</i>' : '');
       const it = this.enemy.intent;
-      const incoming = it && !this.enemy.stunned && (it.move.type === 'attack' || it.move.type === 'barrage') ? it.value : 0;
+      const attacking = it && !this.enemy.stunned && (it.move.type === 'attack' || it.move.type === 'barrage');
+      const incoming = attacking ? it.value : 0;
       const dealt = Math.max(0, r.atk - this.enemy.guard - this.enemy.armor) * (v.atk.length ? 1 : 0) + r.shot;
       const taken = Math.max(0, incoming - r.blk);
-      this.$('.cb-forecast').innerHTML = `<span class="f-out">нанесёшь <b>${dealt}</b></span><span class="f-in ${taken ? 'bad' : 'ok'}">получишь <b>${taken}</b></span>${v.tray.length ? `<span class="f-warn">${v.tray.length} куб. в лотке пропадёт</span>` : ''}`;
+      let takenTxt = String(taken), takenMax = taken;
+      if (attacking && !it.revealed) {
+        // диапазон по скрытым кубам: шквал считает 1–2 промахом
+        const seen = it.value - it.hiddenSum;
+        const lo = seen + it.nHidden * (it.move.type === 'barrage' ? 0 : 1), hi = seen + it.nHidden * 6;
+        const tLo = Math.max(0, lo - r.blk);
+        takenMax = Math.max(0, hi - r.blk);
+        takenTxt = tLo === takenMax ? String(tLo) : `${tLo}–${takenMax}`;
+      }
+      this.$('.cb-forecast').innerHTML = `<span class="f-out">нанесёшь <b>${dealt}</b></span><span class="f-in ${takenMax ? 'bad' : 'ok'}">получишь <b>${takenTxt}</b></span>${v.tray.length ? `<span class="f-warn">${v.tray.length} куб. в лотке пропадёт</span>` : ''}`;
       this.lastEval = r;
     }
 
@@ -443,6 +497,7 @@
         this.player.hp = Math.min(this.player.maxHp, this.player.hp + it.heal);
         this.pop(this.$('.cb-ppanel'), '+' + (this.player.hp - before), 'heal');
       }
+      if (it.reveal) { await this.revealHidden(); await this.banner('ВСКРЫТО', 'все кубы противника на виду', 'gold'); }
       if (id === 'flask') { this.rerolls += 2; this.maxRerolls += 2; await this.banner('ГЛОТОК', '+2 переброса', 'gold'); }
       if (id === 'firecracker') {
         this.enemy.stunned = true; this.enemy.guard = 0;
@@ -533,6 +588,7 @@
       }
       if (m.type === 'charge') { this.say(m.name); await this.banner(m.name.toUpperCase(), m.desc, 'bad'); return; }
       if (m.type === 'guard') return;
+      await this.revealHidden();
       this.$('.it-dice').querySelectorAll('.die').forEach((d, i) => d.animate(
         [{ transform: 'translate(0,0)' }, { transform: `translate(${-500 - i * 40}px, 120px) scale(0.6)`, opacity: 0.2 }],
         { duration: 300, easing: 'cubic-bezier(.5,0,1,.5)', fill: 'forwards' }));

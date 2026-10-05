@@ -64,7 +64,7 @@
     },
     knuckles: {
       name: 'Кастет', kind: 'weapon', icon: 'knuckles',
-      desc: 'Память о подпольном ринге. Пассивно: +2 к УДАРУ.',
+      desc: 'Память о подпольном ринге. Пассивно: +1 к УДАРУ.',
     },
     lockpicks: {
       name: 'Отмычки', kind: 'key', icon: 'lockpicks',
