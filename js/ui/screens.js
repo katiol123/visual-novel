@@ -20,7 +20,7 @@
       VN.Fx.laser(false);
       VN.Backdrop.set('street');
       VN.Audio.combatMusic(false);
-      VN.Audio.ambient('rain');
+      VN.Audio.scene(VN.Locations.street);
       if (this.node) this.node.remove();
       const t = (this.node = el('div', 'title-screen'));
       const cast = ['frog', 'shef', 'grokh', 'kir', 'pelmen', 'goose', 'bugai', 'ded'];

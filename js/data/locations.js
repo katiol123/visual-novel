@@ -1,6 +1,9 @@
 /* ==========================================================================
    Локации: paint() — статичный слой, animate() — покадровая динамика,
    signs — неоновые вывески, weather — дождь/снег/мокрый снег.
+   ambient — синтезированный фон; music — фоновая музыка вместо него.
+   Правило: где слышен дождь — только дождь (music не задаётся),
+   в остальных сценах играет 'score'.
    ========================================================================== */
 (function () {
   'use strict';
@@ -9,7 +12,7 @@
   const ACID = '#b6ff3b', VIOLET = '#c27bff', RED = '#ff2a4d', ICE = '#7fd6ff', AMBER = '#ffb02e';
 
   VN.Locations = {
-    black: { name: '', paint(c) { c.fillStyle = '#000'; c.fillRect(0, 0, W, H); } },
+    black: { name: '', music: 'score', paint(c) { c.fillStyle = '#000'; c.fillRect(0, 0, W, H); } },
 
     /* ------------------------------------------------ квартира Яна */
     apartment: {
@@ -115,7 +118,7 @@
 
     /* ------------------------------------------------ шаурмичная */
     shawarma: {
-      name: 'Шаурма «Вертел 24»', ambient: 'hum', seed: 31,
+      name: 'Шаурма «Вертел 24»', ambient: 'hum', music: 'score', seed: 31,
       weather: 'rain', weatherClip: [1500, 200, 360, 440],
       paint(c, r, P) {
         c.fillStyle = '#18201b'; c.fillRect(0, 0, W, H);
@@ -163,7 +166,7 @@
 
     /* ------------------------------------------------ Участок 13 */
     police: {
-      name: 'Участок 13', ambient: 'hum', seed: 41,
+      name: 'Участок 13', ambient: 'hum', music: 'score', seed: 41,
       paint(c, r, P) {
         P.vgrad(c, 0, 0, W, 600, [[0, '#141a17'], [1, '#1f2925']]);
         P.vgrad(c, 0, 600, W, 260, [[0, '#121815'], [1, '#0c100e']]);
@@ -267,7 +270,7 @@
 
     /* ------------------------------------------------ доки */
     docks: {
-      name: 'Причал «Северный»', ambient: 'wind', seed: 61, weather: 'snow',
+      name: 'Причал «Северный»', ambient: 'wind', music: 'score', seed: 61, weather: 'snow',
       paint(c, r, P) {
         P.vgrad(c, 0, 0, W, 640, [[0, '#050913'], [1, '#18263a']]);
         P.skyline(c, r, { base: 640, minH: 10, maxH: 70, minW: 20, maxW: 60, color: '#0d1522', windows: [ICE, AMBER], winChance: 0.3, winSize: 3, winGap: 8 });
@@ -311,7 +314,7 @@
 
     /* ------------------------------------------------ ворота хладокомбината */
     gate: {
-      name: 'Хладокомбинат №3', ambient: 'wind', seed: 71, weather: 'snow',
+      name: 'Хладокомбинат №3', ambient: 'wind', music: 'score', seed: 71, weather: 'snow',
       paint(c, r, P) {
         P.vgrad(c, 0, 0, W, H, [[0, '#070b12'], [0.6, '#111a22'], [1, '#05070a']]);
         // корпус
@@ -356,7 +359,7 @@
 
     /* ------------------------------------------------ контора */
     office: {
-      name: 'Контора · 2-й этаж', ambient: 'tension', seed: 81,
+      name: 'Контора · 2-й этаж', ambient: 'tension', music: 'score', seed: 81,
       paint(c, r, P) {
         P.vgrad(c, 0, 0, W, 760, [[0, '#14191c'], [1, '#1c2327']]);
         P.grime(c, r, 30, 'rgba(120,140,150,0.06)');
@@ -412,7 +415,7 @@
 
     /* ------------------------------------------------ двор хладокомбината */
     yard: {
-      name: 'Двор хладокомбината', ambient: 'wind', seed: 91, weather: 'snow',
+      name: 'Двор хладокомбината', ambient: 'wind', music: 'score', seed: 91, weather: 'snow',
       paint(c, r, P) {
         P.vgrad(c, 0, 0, W, H, [[0, '#04060c'], [0.5, '#0d141c'], [1, '#05070a']]);
         P.skyline(c, r, { base: 700, minH: 60, maxH: 220, minW: 60, maxW: 140, color: '#0a0f16', windows: [VIOLET, ICE], winChance: 0.1, x1: 1000 });
@@ -442,7 +445,7 @@
 
     /* ------------------------------------------------ крыша / полночь */
     rooftop: {
-      name: 'Порт-Ветров · полночь', ambient: 'wind', seed: 101, weather: 'snow', fireworks: true,
+      name: 'Порт-Ветров · полночь', ambient: 'wind', music: 'score', seed: 101, weather: 'snow', fireworks: true,
       paint(c, r, P) {
         P.vgrad(c, 0, 0, W, H, [[0, '#05030f'], [0.55, '#1a1030'], [0.8, '#2a1530'], [1, '#05040a']]);
         P.skyline(c, r, { base: 820, minH: 80, maxH: 300, minW: 30, maxW: 90, color: '#0e0b1c', windows: [VIOLET, ACID, AMBER, ICE], winChance: 0.22, winSize: 3, winGap: 8 });

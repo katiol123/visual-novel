@@ -45,6 +45,7 @@
 
   class Fight {
     constructor(id, opts, done) {
+      this.id = id;
       this.def = VN.Enemies[id];
       this.opts = opts || {};
       this.done = done;
@@ -124,27 +125,92 @@
     }
 
     /* ------------------------------------------------------------ интро */
+    /* ------------------------------------------------------------ интро
+       Многоэтапная заставка (клик/пробел — пропустить):
+       1 ТРЕВОГА  — мигалка, полосы «опасно», глитч-слово СХВАТКА
+       2 ДОСЬЕ    — карточки бойцов выезжают навстречу, угроза набирается
+       3 VS       — удар, трещина, ударная волна
+       4 КОСТИ    — по экрану катятся кубы, «БРОСАЙ»  → шторка в бой */
     async intro() {
-      const vs = el('div', 'cb-vs');
-      vs.style.setProperty('--ec', this.def.color);
+      const d = this.def, cs = this.cs;
+      const dos = (VN.Characters[this.id] || {}).dossier || {};
+      const threat = dos.threat || 1;
+      const bg = VN.Backgrounds[VN.S.background] || {};
+      const row = (k, v) => `<div class="ci-row"><span>${k}</span><b>${v}</b></div>`;
+      const bar = (hp, max) => `<div class="ci-bar"><i style="--w:${Math.round((hp / max) * 100)}%"></i></div>`;
+      const vs = el('div', 'cbi');
+      vs.style.setProperty('--ec', d.color);
       vs.innerHTML = `
-        <div class="vs-left"><div><small>${(VN.Backgrounds[VN.S.background] || {}).name || ''}</small><b>ЯН<br>КОРСАК</b></div></div>
-        <div class="vs-right"><img src="${this.def.sprite}" alt=""><div><small>${this.def.boss ? 'БОСС' : 'ПРОТИВНИК'}</small><b>${this.def.name}</b></div></div>
-        <div class="vs-x">VS</div>
-        <div class="vs-word">СХВАТКА</div>`;
+        <div class="ci-tint"></div>
+        <div class="ci-hazard top"><i></i></div><div class="ci-hazard bot"><i></i></div>
+        <div class="ci-siren"></div>
+        <div class="ci-code">31.12 · ${VN.State.clock()} · ОПЕРАТИВНАЯ СВОДКА · КОД 10-10</div>
+        <div class="ci-word" data-t="СХВАТКА">СХВАТКА</div>
+        <div class="ci-card ci-left">
+          <div class="ci-tag">ФИГУРАНТ №1 · ${bg.name || ''}</div>
+          <div class="ci-name">ЯН<br>КОРСАК</div>
+          ${row('ЗДОРОВЬЕ', `${this.player.hp}/${this.player.maxHp}`)}${bar(this.player.hp, this.player.maxHp)}
+          ${row('КУБЫ', cs.dice)}${row('ПЕРЕБРОСЫ', cs.rerolls)}${row('УДАР', '+' + cs.atkBonus)}${row('БЛОК', '+' + cs.blkBonus)}
+        </div>
+        <div class="ci-enemy"><img src="${d.sprite}" alt="" draggable="false"></div>
+        <div class="ci-card ci-right">
+          <div class="ci-tag">${d.boss ? 'ГЛАВНАЯ ЦЕЛЬ' : 'ФИГУРАНТ №2'} · ${dos.role || ''}</div>
+          <div class="ci-name">${d.name}</div>
+          <div class="ci-threat"><span>УГРОЗА</span>${[1, 2, 3, 4, 5].map((n) => `<i class="${n <= threat ? 'on' : ''}" style="--n:${n}"></i>`).join('')}</div>
+          ${row('ЗДОРОВЬЕ', `${this.enemy.hp}/${this.enemy.maxHp}`)}${bar(this.enemy.hp, this.enemy.maxHp)}
+          ${row('БРОНЯ', this.enemy.armor || '—')}${d.hidden ? row('СКРЫТЫЕ КУБЫ', '?'.repeat(d.hidden)) : ''}
+        </div>
+        <div class="ci-crack"></div>
+        <div class="ci-vs"><i class="ring"></i><i class="ring r2"></i><b>VS</b></div>
+        <div class="ci-dice"></div>
+        <div class="ci-go"><b>БРОСАЙ КОСТИ</b><span>${d.boss ? 'ПОСЛЕДНИЙ РАУНД ЭТОЙ НОЧИ' : 'КОСТИ НА СУКНЕ'}</span></div>
+        <div class="ci-shutter"><i></i><i></i></div>
+        <div class="ci-skip">клик — пропустить</div>`;
       document.getElementById('overlay').appendChild(vs);
-      VN.Audio.sfx('impact');
-      VN.Fx.shake(20, 500);
-      await VN.util.frame();
-      vs.classList.add('in');
-      await sleep(VN.mode.skip ? 500 : 1700);
-      this.build();
-      vs.classList.add('out');
-      await sleep(500);
-      vs.remove();
-      this.root.classList.add('in');
+
+      // пропуск: клик или пробел мгновенно доводят заставку до конца
+      let skipped = VN.mode.skip, wake = null;
+      const skip = (e) => { if (e) { e.stopPropagation(); if (e.type === 'keydown') e.preventDefault(); } skipped = true; wake && wake(); };
+      const onKey = (e) => { if (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape') skip(e); };
+      vs.addEventListener('click', skip);
+      window.addEventListener('keydown', onKey, true);
+      const wait = (ms) => (skipped ? Promise.resolve() : new Promise((r) => { const t = setTimeout(r, ms); wake = () => { clearTimeout(t); r(); }; }));
+      const stage = (n) => { vs.className = 'cbi s' + n; };
+
       VN.Audio.combatMusic(true);
-      await sleep(400);
+      await VN.util.frame();
+      // 1 · тревога
+      stage(1); VN.Audio.sfx('glitch'); VN.Audio.sfx('heartbeat');
+      await wait(420); if (!skipped) { VN.Audio.sfx('heartbeat'); VN.Fx.shake(8, 300); }
+      await wait(780);
+      // 2 · досье
+      stage(2); if (!skipped) { VN.Audio.sfx('whoosh'); setTimeout(() => !skipped && VN.Audio.sfx('stamp'), 420); }
+      for (let n = 1; n <= threat && !skipped; n++) setTimeout(() => !skipped && VN.Audio.sfx('clock'), 600 + n * 120);
+      await wait(1350);
+      // 3 · VS
+      stage(3); if (!skipped) { VN.Audio.sfx('impact'); VN.Fx.shake(26, 650); VN.Fx.flash('#fff', 160); }
+      await wait(1050);
+      // 4 · кости
+      stage(4);
+      if (!skipped) {
+        VN.Audio.sfx('dice');
+        const box = vs.querySelector('.ci-dice');
+        [0, 1, 2].forEach((k) => {
+          const die = VN.Dice.make(1, k === 1 ? 'blood' : 'bone');
+          box.appendChild(die.el);
+          die.roll(VN.Dice.d6(), { from: { x: -700 + k * 80, y: 120 - k * 60 }, dur: 900 + k * 120 });
+        });
+      }
+      await wait(1250);
+      // шторка → стол
+      stage(5); if (!skipped) VN.Audio.sfx('shutter');
+      await wait(380);
+      this.build();
+      window.removeEventListener('keydown', onKey, true);
+      vs.classList.add('out');
+      this.root.classList.add('in');
+      await sleep(450);
+      vs.remove();
       if (!VN.Meta.data.tutorial) { VN.Meta.set('tutorial', true); await this.help(); }
     }
 

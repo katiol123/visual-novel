@@ -11,7 +11,7 @@
     muted: false, noiseBuf: null, amb: {}, music: null, lastTick: 0,
 
     init() {
-      if (this.ctx) { this.ctx.resume && this.ctx.resume(); return; }
+      if (this.ctx) { this.ctx.resume && this.ctx.resume(); this.resumeMusic(); return; }
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       const c = (this.ctx = new AC());
@@ -25,11 +25,13 @@
       const d = this.noiseBuf.getChannelData(0);
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
       if (this.pendingAmb) this.ambient(this.pendingAmb);
+      this.resumeMusic();
     },
 
     toggleMute() {
       this.muted = !this.muted;
       if (this.master) this.master.gain.setTargetAtTime(this.muted ? 0 : 0.8, this.ctx.currentTime, 0.05);
+      Object.values(this.tracks || {}).forEach((t) => (t.a.muted = this.muted));
       return this.muted;
     },
 
@@ -116,27 +118,73 @@
       this.amb[name] = { gain, nodes };
     },
 
-    /* ---------- боевой луп: бочка + бас + хэт ---------- */
+    /* ---------- музыка из файлов ----------
+       Две «полки»: сцена (фоновая музыка локации) и бой (перекрывает сцену).
+       HTMLAudio, а не fetch+decode — так работает и при открытии через file://. */
+    TRACKS: {
+      score: { src: 'assets/music/echoes-of-the-abyss.mp3', vol: 0.42 },
+      fight: { src: 'assets/music/steel-tangerines.mp3', vol: 0.6 },
+    },
+    tracks: {}, sceneTrack: null, fightOn: false, playing: null,
+
+    _el(name) {
+      if (!this.tracks[name]) {
+        const t = this.TRACKS[name];
+        const a = new Audio(t.src);
+        a.loop = true; a.preload = 'auto'; a.volume = 0;
+        this.tracks[name] = { a, target: t.vol, fade: null };
+      }
+      return this.tracks[name];
+    },
+    _fade(name, to, ms, then) {
+      const t = this._el(name), a = t.a;
+      clearInterval(t.fade);
+      const from = a.volume, t0 = performance.now();
+      t.fade = setInterval(() => {
+        const k = Math.min(1, (performance.now() - t0) / ms);
+        a.volume = Math.max(0, Math.min(1, from + (to - from) * k));
+        if (k >= 1) { clearInterval(t.fade); t.fade = null; then && then(); }
+      }, 30);
+    },
+    /** Переключить играющую музыку на трек name (или тишину) с кроссфейдом. */
+    _switch(name, ms = 1400, restart) {
+      if (this.playing === name && !restart) return;
+      const old = this.playing;
+      this.playing = name;
+      if (old) this._fade(old, 0, ms, () => { if (this.playing !== old) this._el(old).a.pause(); });
+      if (!name) return;
+      const t = this._el(name);
+      if (restart || t.a.paused) { if (restart) t.a.currentTime = 0; }
+      t.a.muted = this.muted;
+      const p = t.a.play();
+      if (p && p.catch) p.catch(() => { this.pendingMusic = true; });
+      this._fade(name, t.target, ms);
+    },
+    /** Фоновая музыка сцены: 'score' или null. Во время боя только запоминается. */
+    music(name) {
+      this.sceneTrack = name || null;
+      if (!this.fightOn) this._switch(this.sceneTrack);
+    },
+    /** Боевая музыка: on — с начала трека, off — затухание и возврат к музыке сцены. */
     combatMusic(on) {
-      if (!this.ctx) return;
-      if (!on) { if (this.music) { clearInterval(this.music.id); this.music = null; } return; }
-      if (this.music) return;
-      const bpm = 112, step = 60 / bpm / 2;
-      const bass = [41.2, 0, 41.2, 49, 0, 41.2, 55, 49];
-      let n = 0, next = this.ctx.currentTime + 0.1;
-      const id = setInterval(() => {
-        const c = this.ctx;
-        while (next < c.currentTime + 0.2) {
-          const d = next - c.currentTime;
-          if (n % 4 === 0) this.tone(90, 0.25, { slide: 38, gain: 0.5, delay: d, bus: this.musBus });
-          if (n % 2 === 1) this.noise(0.05, { type: 'highpass', freq: 7000, gain: 0.06, delay: d, bus: this.musBus });
-          if (n % 8 === 4) this.noise(0.18, { type: 'bandpass', freq: 1800, q: 0.7, gain: 0.12, delay: d, bus: this.musBus });
-          const b = bass[n % 8];
-          if (b) this.tone(b, step * 0.9, { type: 'sawtooth', lp: 260, gain: 0.16, delay: d, bus: this.musBus });
-          next += step; n++;
-        }
-      }, 40);
-      this.music = { id };
+      this.fightOn = !!on;
+      if (on) { this._duckAmbient(0.25); this._switch('fight', 500, true); }
+      else { this._duckAmbient(1); this._switch(this.sceneTrack, 1800); }
+    },
+    _duckAmbient(k) {
+      if (this.ctx && this.ambBus) this.ambBus.gain.setTargetAtTime(0.7 * k, this.ctx.currentTime, 0.4);
+    },
+    /** Звук локации: дождь — только дождь; без дождя — фоновая музыка. */
+    scene(loc) {
+      if (!loc) { this.ambient(null); this.music(null); return; }
+      if (loc.music) { this.ambient(loc.musicAmbient || null); this.music(loc.music); }
+      else { this.music(null); this.ambient(loc.ambient); }
+    },
+    resumeMusic() {
+      if (!this.pendingMusic || !this.playing) return;
+      this.pendingMusic = false;
+      const p = this._el(this.playing).a.play();
+      if (p && p.catch) p.catch(() => { this.pendingMusic = true; });
     },
   };
 

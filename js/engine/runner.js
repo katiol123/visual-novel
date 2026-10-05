@@ -36,8 +36,7 @@
       VN.Title.hide();
       VN.Modal.stack.slice().forEach((m) => VN.Modal.close(m));
       VN.Backdrop.set(S.stage.bg || 'black');
-      const loc = VN.Locations[S.stage.bg];
-      VN.Audio.ambient(loc && loc.ambient);
+      VN.Audio.scene(VN.Locations[S.stage.bg]);
       VN.Stage.restore(S.stage.sprites);
       VN.Fx.laser(!!S.flags._laser);
       VN.HUD.show(true);
@@ -119,7 +118,7 @@
           S.stage.bg = c.bg;
           VN.Dialogue.hide();
         });
-        VN.Audio.ambient(c.amb || (loc && loc.ambient));
+        if (c.amb) VN.Audio.ambient(c.amb); else VN.Audio.scene(loc);
       }
       if (c.amb && !c.bg) VN.Audio.ambient(c.amb);
       if (c.chapter) { VN.Dialogue.hide(); await VN.Trans.chapter(c.chapter, c.title || ''); }
