@@ -20,28 +20,8 @@
   const VN = window.VN;
   const { el, sleep, pick, clamp } = VN.util;
 
-  function evaluate(values, ctx) {
-    const atkV = values.atk, blkV = values.blk, shotV = values.shot;
-    const combos = [];
-    let atk = atkV.reduce((a, b) => a + b, 0);
-    if (atkV.length) atk += ctx.atkBonus;
-    const counts = {};
-    atkV.forEach((v) => (counts[v] = (counts[v] || 0) + 1));
-    const maxC = Math.max(0, ...Object.values(counts));
-    const pairs = Object.values(counts).filter((c) => c >= 2).length;
-    const uniq = [...new Set(atkV)].sort((a, b) => a - b);
-    let run = 1, best = 1;
-    for (let i = 1; i < uniq.length; i++) { run = uniq[i] === uniq[i - 1] + 1 ? run + 1 : 1; best = Math.max(best, run); }
-    if (best >= 3) { atk += 5; combos.push({ t: 'СТРИТ', v: '+5' }); }
-    if (maxC >= 3) { atk *= 2; combos.push({ t: 'ТРОЙКА', v: '×2' }); }
-    else if (pairs >= 2) { atk += 6; combos.push({ t: 'ДВЕ ПАРЫ', v: '+6' }); }
-    else if (pairs === 1) { atk += 3; combos.push({ t: 'ДУПЛЕТ', v: '+3' }); }
-    let blk = blkV.reduce((a, b) => a + b, 0);
-    if (blkV.length) blk += ctx.blkBonus;
-    const counter = blkV.includes(6);
-    const shot = shotV.length ? (shotV[0] === 6 ? 15 : shotV[0] * 2) : 0;
-    return { atk, blk, shot, counter, combos, bullseye: shotV[0] === 6 };
-  }
+  const Rules = VN.CombatRules;
+  const evaluate = Rules.evaluate;
 
   class Fight {
     constructor(id, opts, done) {
@@ -49,12 +29,14 @@
       this.def = VN.Enemies[id];
       this.opts = opts || {};
       this.done = done;
-      const cs = VN.State.combatStats();
-      this.cs = cs;
-      const hpMul = this.opts.enemyHp || 1;
-      this.enemy = { hp: Math.ceil(this.def.hp * hpMul), maxHp: this.def.hp, armor: this.def.armor || 0, guard: 0, stunned: false, next: null, lastType: null, intent: null };
-      this.player = { hp: VN.S.hp, maxHp: VN.S.maxHp, bleed: 0, burn: 0, cuff: false };
-      this.round = 0;
+      const mods = (typeof this.opts.mods === 'function' ? this.opts.mods(VN.S) : this.opts.mods || []).map((m) => (typeof m === 'string' ? VN.CombatMods[m] : m)).filter(Boolean);
+      // состояние боя живёт в модуле правил: те же формулы, что в симуляторе баланса
+      const st = (this.st = Rules.makeState(this.def, VN.State.combatStats(), { hp: VN.S.hp, maxHp: VN.S.maxHp }, mods));
+      if (this.opts.enemyHp) st.enemy.hp = Math.ceil(st.enemy.hp * this.opts.enemyHp);
+      this.cs = st.cs;
+      this.enemy = st.enemy;
+      this.player = st.player;
+      this.mods = st.mods;
       this.dice = [];
       this.phase = 'intro';
     }
@@ -77,6 +59,7 @@
             <span title="Броня: снижает урон твоего УДАРА">БРОНЯ <b>${this.enemy.armor || 0}</b></span>
           </div>
           <div class="cb-bar enemy"><i class="lag"></i><i class="fill"></i><span></span></div>
+          <div class="cb-passives">${Rules.describe(d).map((p) => `<span title="${p.d}">${p.t}</span>`).join('')}</div>
           <div class="cb-estatus"></div>
         </div>
         <div class="cb-intent">
@@ -91,6 +74,7 @@
           <div class="cb-pname">ЯН КОРСАК <small>${(VN.Backgrounds[VN.S.background] || {}).name || ''}</small></div>
           <div class="cb-bar player"><i class="lag"></i><i class="fill"></i><span></span></div>
           <div class="cb-res"></div>
+          <div class="cb-mods">${this.mods.map((m) => `<span class="${m.kind}" title="${m.desc}">${m.name}</span>`).join('')}</div>
           <div class="cb-pstatus"></div>
         </div>
         <div class="cb-table">
@@ -138,8 +122,8 @@
        4 КОСТИ    — по экрану катятся кубы, «БРОСАЙ»  → шторка в бой */
     async intro() {
       const d = this.def, cs = this.cs;
-      const dos = (VN.Characters[this.id] || {}).dossier || {};
-      const threat = dos.threat || 1;
+      const dos = (VN.Characters[d.char || this.id] || {}).dossier || {};
+      const threat = d.threat || dos.threat || 1;
       const bg = VN.Backgrounds[VN.S.background] || {};
       const row = (k, v) => `<div class="ci-row"><span>${k}</span><b>${v}</b></div>`;
       const bar = (hp, max) => `<div class="ci-bar"><i style="--w:${Math.round((hp / max) * 100)}%"></i></div>`;
@@ -155,7 +139,7 @@
           <div class="ci-tag">ФИГУРАНТ №1 · ${bg.name || ''}</div>
           <div class="ci-name">ЯН<br>КОРСАК</div>
           ${row('ЗДОРОВЬЕ', `${this.player.hp}/${this.player.maxHp}`)}${bar(this.player.hp, this.player.maxHp)}
-          ${row('КУБЫ', cs.dice)}${row('ПЕРЕБРОСЫ', cs.rerolls)}${row('УДАР', '+' + cs.atkBonus)}${row('БЛОК', '+' + cs.blkBonus)}
+          ${row('КУБЫ', cs.dice + (this.st.dice1 ? ` <small>(${this.st.dice1 > 0 ? '+' : ''}${this.st.dice1} в 1-м раунде)</small>` : ''))}${row('ПЕРЕБРОСЫ', cs.rerolls)}${row('УДАР', '+' + cs.atkBonus)}${row('БЛОК', '+' + cs.blkBonus)}
         </div>
         <div class="ci-enemy"><img src="${d.sprite}" alt="" draggable="false"></div>
         <div class="ci-card ci-right">
@@ -165,6 +149,10 @@
           ${row('ЗДОРОВЬЕ', `${this.enemy.hp}/${this.enemy.maxHp}`)}${bar(this.enemy.hp, this.enemy.maxHp)}
           ${row('АТАКА', this.atkText())}${row('БРОНЯ', this.enemy.armor || '—')}${d.hidden ? row('СКРЫТЫЕ КУБЫ', '?'.repeat(d.hidden)) : ''}
         </div>
+        ${(Rules.describe(d).length || this.mods.length) ? `<div class="ci-mods">
+          ${Rules.describe(d).map((p) => `<div class="ci-mod passive"><b>${p.t}</b><span>${p.d}</span></div>`).join('')}
+          ${this.mods.map((m) => `<div class="ci-mod ${m.kind}"><b>${m.name}</b><span>${m.desc}</span></div>`).join('')}
+        </div>` : ''}
         <div class="ci-crack"></div>
         <div class="ci-vs"><i class="ring"></i><i class="ring r2"></i><b>VS</b></div>
         <div class="ci-dice"></div>
@@ -191,7 +179,7 @@
       // 2 · досье
       stage(2); if (!skipped) { VN.Audio.sfx('whoosh'); setTimeout(() => !skipped && VN.Audio.sfx('stamp'), 420); }
       for (let n = 1; n <= threat && !skipped; n++) setTimeout(() => !skipped && VN.Audio.sfx('clock'), 600 + n * 120);
-      await wait(1350);
+      await wait(this.mods.length || (this.def.passives || []).length ? 2600 : 1350);
       // 3 · VS
       stage(3); if (!skipped) { VN.Audio.sfx('impact'); VN.Fx.shake(26, 650); VN.Fx.flash('#fff', 160); }
       await wait(1050);
@@ -258,6 +246,7 @@
       if (this.player.bleed) st.push(`<span class="st bleed">КРОВЬ ×${this.player.bleed}</span>`);
       if (this.player.burn) st.push(`<span class="st burn">ОЖОГ ×${this.player.burn}</span>`);
       if (this.player.cuff) st.push('<span class="st cuff">НАРУЧНИКИ −1 куб</span>');
+      if (this.player.poison) st.push(`<span class="st bleed">ЯД ×${this.player.poison}</span>`);
       this.$('.cb-pstatus').innerHTML = st.join('');
       const es = [];
       if (this.enemy.guard) es.push(`<span class="st guard">БЛОК ${this.enemy.guard}</span>`);
@@ -308,18 +297,9 @@
     }
 
     /* ------------------------------------------------------------ раунд */
-    pickMove() {
-      const moves = this.def.moves;
-      if (this.enemy.next != null) { const m = moves[this.enemy.next]; this.enemy.next = null; return m; }
-      const pool = moves.filter((m) => m.w > 0 && !(m.type === 'guard' && this.enemy.lastType === 'guard') && !(m.type === 'charge' && this.round === 1));
-      const tot = pool.reduce((a, m) => a + m.w, 0);
-      let r = Math.random() * tot;
-      for (const m of pool) { r -= m.w; if (r <= 0) return m; }
-      return pool[0];
-    }
-
     async enemyIntent() {
-      const m = this.pickMove();
+      const { intent, log } = Rules.rollIntent(this.st);
+      const m = intent.move;
       const box = this.$('.cb-intent');
       box.className = 'cb-intent t-' + m.type;
       this.$('.it-name').textContent = m.name;
@@ -330,54 +310,46 @@
         const ds = [];
         for (let i = 0; i < m.dice; i++) { const d = VN.Dice.make(1, 'blood'); dz.appendChild(d.el); ds.push(d); }
         VN.Audio.sfx('dice');
-        await Promise.all(ds.map((d) => { const v = VN.Dice.d6(); vals.push(v); return d.roll(v, { from: { x: 120, y: -120 }, dur: 800 }); }));
+        await Promise.all(ds.map((d, k) => { const v = intent.vals[k]; vals.push(v); return d.roll(v, { from: { x: 120, y: -120 }, dur: 800 }); }));
         if (m.type === 'barrage') ds.forEach((d) => { if (d.value <= 2) d.el.classList.add('miss'); });
         this.intentDice = ds;
       }
-      let value = 0;
-      if (m.type === 'attack') value = vals.reduce((a, b) => a + b, 0) + (m.bonus || 0);
-      if (m.type === 'barrage') value = vals.filter((v) => v > 2).reduce((a, b) => a + b, 0) + (m.bonus || 0);
-      if (m.type === 'guard') value = vals.reduce((a, b) => a + b, 0) + (m.bonus || 0);
-      const pair = vals.length >= 2 && new Set(vals).size < vals.length;
-      // скрытые кубы: только у атак, первые def.hidden кубов
-      const nHidden = (m.type === 'attack' || m.type === 'barrage') ? Math.min(this.def.hidden || 0, vals.length) : 0;
-      const hiddenSum = vals.slice(0, nHidden).reduce((a, v) => a + (m.type === 'barrage' && v <= 2 ? 0 : v), 0);
-      this.enemy.intent = { move: m, value, pair, vals, nHidden, hiddenSum, revealed: nHidden === 0 };
+      const nHidden = intent.nHidden;
       for (let i = 0; i < nHidden; i++) {
         const d = this.intentDice[i];
         d.el.classList.remove('miss');
         d.el.appendChild(el('i', 'die-cover', '?'));
         d.el.classList.add('hidden-die');
       }
-      this.enemy.guard = m.type === 'guard' ? value : 0;
-      this.enemy.lastType = m.type;
-      if (m.type === 'charge') this.enemy.next = m.next;
       this.renderIntentValue();
       box.classList.add('show');
+      for (const l of log) await this.banner(l.t, l.sub, l.kind);
       if (Math.random() < 0.6) this.say(pick(this.def.taunts));
       this.updateBars();
     }
 
     /** Диапазон прибавки атаки по всем атакующим приёмам: «+4» или «+4…+7». */
     atkText() {
-      const b = this.def.moves.filter((m) => m.type === 'attack' || m.type === 'barrage').map((m) => m.bonus || 0);
+      const extra = this.enemy.atkMod + ((this.def.passives || []).find((p) => p.id === 'drunk') || { atk: 0 }).atk;
+      const b = this.def.moves.filter((m) => m.type === 'attack' || m.type === 'barrage').map((m) => (m.bonus || 0) + extra);
       if (!b.length) return '—';
+      const sg = (x) => (x < 0 ? '−' + -x : '+' + x);
       const lo = Math.min(...b), hi = Math.max(...b);
-      return lo === hi ? `+${lo}` : `+${lo}…+${hi}`;
+      return lo === hi ? sg(lo) : `${sg(lo)}…${sg(hi)}`;
     }
 
     /** Расшифровка намерения: «кубы 7 + атака 4». */
     renderFormula() {
       const it = this.enemy.intent, m = it.move, f = this.$('.it-formula');
       if (m.type === 'charge' || this.enemy.stunned) { f.innerHTML = ''; return; }
-      const bonus = m.bonus || 0;
+      const bonus = it.bonus != null ? it.bonus : m.bonus || 0;
       const dice = it.value - bonus;
       const shown = it.vals.length - it.nHidden; // сколько кубов видно
       const q = '?'.repeat(it.nHidden).split('').join(' + ');
       const diceTxt = it.revealed ? dice : shown > 0 ? `${dice - it.hiddenSum} + ${q}` : q;
       const what = m.type === 'guard' ? 'ЗАЩИТА' : 'АТАКА';
       const note = m.type === 'barrage' ? ' <em>(1–2 мимо)</em>' : '';
-      f.innerHTML = `кубы <b>${diceTxt}</b>${note}${bonus ? ` + ${what} <b>${bonus}</b>` : ''}`;
+      f.innerHTML = `кубы <b>${diceTxt}</b>${note}${bonus ? ` + ${what} <b>${bonus}</b>` : ''}${it.alt != null ? ' <em>· или вторая книга</em>' : ''}`;
     }
 
     renderIntentValue() {
@@ -386,12 +358,13 @@
       const lab = m.type === 'guard' ? 'БЛОК' : m.type === 'charge' ? 'ГОТОВИТСЯ' : 'УРОН';
       const box = this.$('.it-value');
       if (m.type === 'charge') { box.innerHTML = `<b>!</b><span>${lab}</span>`; return; }
+      const alt = it.alt != null ? `<i class="alt">/${it.alt}</i>` : '';
       if (!it.revealed) {
         const seen = it.value - it.hiddenSum;
-        box.innerHTML = `<b>${seen}<i class="q">+${'?'.repeat(it.nHidden)}</i></b><span>${lab}</span>`;
+        box.innerHTML = `<b>${seen}<i class="q">+${'?'.repeat(it.nHidden)}</i>${alt}</b><span>${lab}</span>`;
         return;
       }
-      box.innerHTML = `<b>${it.value}</b><span>${lab}${it.pair && m.pairEffect ? ' · ПАРА!' : ''}</span>`;
+      box.innerHTML = `<b>${it.value}${alt}</b><span>${lab}${it.pair && m.pairEffect ? ' · ПАРА!' : ''}</span>`;
     }
 
     /** Вскрыть скрытые кубы намерения (при ударе или предметом с reveal). */
@@ -415,7 +388,7 @@
     async playerRoll() {
       this.dice.forEach((d) => d.d.el.remove());
       this.dice = [];
-      const n = Math.max(1, this.cs.dice - (this.player.cuff ? 1 : 0));
+      const n = Math.max(1, this.cs.dice + (this.st.round === 1 ? this.st.dice1 : 0) - (this.player.cuff ? 1 : 0));
       this.player.cuff = false;
       this.maxRerolls = this.cs.rerolls;
       this.rerolls = this.cs.rerolls;
@@ -431,6 +404,14 @@
         rolls.push(d.roll(VN.Dice.d6(), { from: { x: -380 + i * 40, y: 260 } }));
       }
       await Promise.all(rolls);
+      const stolen = Rules.afterRoll(this.st, this.dice.map((o) => o.d.value));
+      if (stolen >= 0) {
+        const o = this.dice.splice(stolen, 1)[0];
+        o.d.el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translate(900px, -500px) rotate(200deg) scale(.5)', opacity: 0 }], { duration: 600, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards' });
+        this.say('Моё!');
+        await this.banner('КРАЖА', `унесли твой куб ${o.d.value}`, 'bad');
+        o.d.el.remove();
+      }
       this.phase = 'assign';
       this.root.classList.add('assigning');
       this.preview();
@@ -530,6 +511,11 @@
       const dealt = Math.max(0, r.atk - this.enemy.guard - this.enemy.armor) * (v.atk.length ? 1 : 0) + r.shot;
       const taken = Math.max(0, incoming - r.blk);
       let takenTxt = String(taken), takenMax = taken;
+      if (attacking && it.alt != null) {
+        const a = Math.max(0, it.alt - r.blk);
+        takenMax = Math.max(taken, a);
+        takenTxt = `${Math.min(taken, a)}–${takenMax}`;
+      }
       if (attacking && !it.revealed) {
         // диапазон по скрытым кубам: шквал считает 1–2 промахом
         const seen = it.value - it.hiddenSum;
@@ -620,6 +606,7 @@
         await sleep(160);
         if (r.bullseye) await this.banner('В ЯБЛОЧКО', '15 урона сквозь защиту', 'gold');
         this.hitEnemy(r.shot, 'shot');
+        await this.applyLog(Rules.afterEnemyHit(this.st, r.shot, 'shot'));
         await sleep(500);
         this.updateRes();
         if (this.enemy.hp <= 0) return this.finish('win');
@@ -639,6 +626,8 @@
         else { VN.Audio.sfx('lock'); this.pop(espr, 'НЕ ПРОБИЛ', 'guard'); }
         await sleep(dmg >= 14 ? 900 : 550);
         if (this.enemy.hp <= 0) return this.finish('win');
+        await this.applyLog(Rules.afterEnemyHit(this.st, dmg, 'atk'));
+        if (this.player.hp <= 0) return this.finish('lose');
       }
 
       // 3. ответ противника
@@ -656,8 +645,21 @@
           await sleep(450);
         }
       }
+      await this.applyLog(Rules.endRound(this.st));
+      if (this.enemy.hp <= 0) return this.finish('win');
       if (this.player.hp <= 0) return this.finish('lose');
       this.nextRound();
+    }
+
+    /** Показать события правил (баннеры, урон). Урон уже посчитан в правилах. */
+    async applyLog(log) {
+      for (const l of log) {
+        if (l.toPlayer) { this.pop(this.$('.cb-ppanel'), '−' + l.toPlayer, 'dmg'); VN.Audio.sfx('hurt'); VN.Fx.shake(10, 300); }
+        if (l.toEnemy) { const e = this.$('.cb-esprite'); e.classList.remove('hurt'); void e.offsetWidth; e.classList.add('hurt'); this.pop(e, '−' + l.toEnemy, 'shot'); VN.Audio.sfx('gunshot'); }
+        if (l.toEnemyHeal) this.pop(this.$('.cb-esprite'), '+' + l.toEnemyHeal, 'heal');
+        this.updateBars();
+        await this.banner(l.t, l.sub, l.kind);
+      }
     }
 
     hitEnemy(dmg, kind) {
@@ -688,7 +690,9 @@
         [{ transform: 'translate(0,0)' }, { transform: `translate(${-500 - i * 40}px, 120px) scale(0.6)`, opacity: 0.2 }],
         { duration: 300, easing: 'cubic-bezier(.5,0,1,.5)', fill: 'forwards' }));
       await sleep(260);
-      const incoming = it.value;
+      const incoming = Rules.realIncoming(this.st);
+      if (it.missed) { this.say(pick(['Мимо!..', 'Где ты?!', 'Стой ровно!'])); await this.banner('ПЬЯНЫЙ ПРИЦЕЛ', 'мимо', 'acid'); }
+      if (it.alt != null) { this.$('.it-value').innerHTML = `<b>${incoming}</b><span>НАСТОЯЩАЯ КНИГА</span>`; await this.banner('НАСТОЯЩАЯ КНИГА', `урон ${incoming}`, 'bad'); }
       const blocked = Math.min(incoming, r.blk);
       const dmg = incoming - blocked;
       if (blocked) this.pop(this.$('.s-blk'), `БЛОК −${blocked}`, 'guard');
@@ -702,6 +706,7 @@
         if (m.onHit === 'burn') { this.player.burn = 2; await this.banner('ОЖОГ', '2 урона следующие 2 раунда', 'bad'); }
         if (m.onHit === 'cuff') { this.player.cuff = true; await this.banner('НАРУЧНИКИ', '−1 куб в следующем раунде', 'bad'); }
         if (m.pairEffect === 'bleed' && it.pair) { this.player.bleed = 2; await this.banner('КРОВОТЕЧЕНИЕ', '2 урона следующие 2 раунда', 'bad'); }
+        await this.applyLog(Rules.afterPlayerHit(this.st, dmg));
       } else if (incoming > 0) {
         VN.Audio.sfx('lock');
         await this.banner('ЧИСТЫЙ БЛОК', '', 'acid');
@@ -718,14 +723,13 @@
     }
 
     async nextRound() {
-      this.enemy.guard = 0;
       // убрать кубы со стола
       this.dice.forEach((o) => o.d.el.animate([{ opacity: 1 }, { opacity: 0, transform: 'scale(0.6)' }], { duration: 200, fill: 'forwards' }));
       this.$('.cb-intent').classList.remove('show');
       await sleep(250);
-      this.round++;
+      this.st.round++;
       const rd = this.$('.cb-round');
-      rd.textContent = 'РАУНД ' + this.round;
+      rd.textContent = 'РАУНД ' + this.st.round;
       rd.classList.remove('show'); void rd.offsetWidth; rd.classList.add('show');
       VN.Audio.sfx('clock');
       await sleep(VN.mode.skip ? 100 : 500);
@@ -771,6 +775,7 @@
 
   VN.Combat = {
     evaluate,
+    Fight,
     start(id, opts) {
       return new Promise((resolve) => { new Fight(id, opts, resolve).run(); });
     },

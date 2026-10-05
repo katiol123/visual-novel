@@ -20,14 +20,14 @@
   };
 
   VN.Endings = {
-    brother: { title: 'БРАТ', color: '#b6ff3b', sub: 'Мика жив. Ключ у тебя. Война только начинается.' },
-    price: { title: 'ЦЕНА', color: '#ffb02e', sub: 'Мика жив — но ночь взяла своё.' },
-    roof: { title: 'КРЫША', color: '#7fd6ff', sub: 'Ключ ушёл к человеку, который похоронил отца.' },
-    judas: { title: 'ИУДА', color: '#b6ff3b', sub: 'Бывший напарник выбрал деньги.' },
-    deal: { title: 'СДЕЛКА', color: '#c27bff', sub: 'Брат в обмен на правду.' },
-    late: { title: 'ОПОЗДАЛ', color: '#ff2a4d', sub: 'Куранты пробили раньше.' },
-    cell: { title: 'РЕШЁТКА', color: '#c9d4c2', sub: 'Новый год за решёткой Участка 13.' },
-    silence: { title: 'ТИШИНА', color: '#ff2a4d', sub: 'Ян Корсак не встретил Новый год.' },
+    brother: { act: 0, next: 'a1_start', title: 'БРАТ', color: '#b6ff3b', sub: 'Мика жив. Ключ у тебя. Война только начинается.' },
+    price: { act: 0, next: 'a1_start', title: 'ЦЕНА', color: '#ffb02e', sub: 'Мика жив — но ночь взяла своё.' },
+    roof: { act: 0, next: 'a1_start', title: 'КРЫША', color: '#7fd6ff', sub: 'Ключ ушёл к человеку, который похоронил отца.' },
+    judas: { act: 0, next: 'a1_start', title: 'ИУДА', color: '#b6ff3b', sub: 'Бывший напарник выбрал деньги.' },
+    deal: { act: 0, next: 'a1_start', title: 'СДЕЛКА', color: '#c27bff', sub: 'Брат в обмен на правду.' },
+    late: { act: 0, next: 'a1_start', title: 'ОПОЗДАЛ', color: '#ff2a4d', sub: 'Куранты пробили раньше.' },
+    cell: { act: 0, next: 'a1_start', title: 'РЕШЁТКА', color: '#c9d4c2', sub: 'Новый год за решёткой Участка 13.' },
+    silence: { act: 0, title: 'ТИШИНА', color: '#ff2a4d', sub: 'Ян Корсак не встретил Новый год.' },
   };
 
   VN.Backgrounds = {

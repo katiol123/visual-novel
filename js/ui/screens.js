@@ -43,8 +43,9 @@
         <div class="title-menu">
           <button data-a="new">НОВОЕ ДЕЛО</button>
           <button data-a="cont" ${hasSave ? '' : 'disabled'}>ПРОДОЛЖИТЬ</button>
+          <button data-a="act1" ${VN.State.peekActStart(1) ? '' : 'disabled'} title="Продолжить с последнего финала пролога">ГЛАВА I</button>
           <button data-a="load">ЗАГРУЗИТЬ</button>
-          <button data-a="board">КОНЦОВКИ <small>${ends}/8</small></button>
+          <button data-a="board">КОНЦОВКИ <small>${ends}/${Object.keys(VN.Endings).length}</small></button>
         </div>
         <div class="title-foot">Пробел / клик — дальше · 1–9 — выбор · I — кейс · B — доска · L — журнал · A — авто · S — пропуск · H — скрыть UI</div>`;
       document.getElementById('game').appendChild(t);
@@ -59,6 +60,7 @@
           if (a === 'new') { this.hide(); VN.Runner.newGame(); }
           if (a === 'cont') { this.hide(); VN.Runner.loadSlot('auto'); }
           if (a === 'load') VN.Saves.open(true);
+          if (a === 'act1') { this.hide(); VN.State.loadActStart(1); VN.mode.auto = VN.mode.skip = false; VN.Runner.start('a1_start', 0); }
           if (a === 'board') VN.Board.open();
         });
       });
@@ -169,22 +171,28 @@
         VN.HUD.show(false);
         VN.Audio.combatMusic(false);
         const S = VN.S;
-        const blocks = new Set(S.path.filter((p) => (VN.Story.get(p) || {}).block)).size;
+        const act = e.act || 0;
+        const actBlocks = VN.Story.blocks(act);
+        const total = new Set(actBlocks.map((b) => b.block)).size;
+        const blocks = new Set(S.path.map((p) => VN.Story.get(p)).filter((sc) => sc && sc.block && (sc.act || 0) === act).map((sc) => sc.block)).size;
+        const actEnds = Object.entries(VN.Endings).filter(([, x]) => (x.act || 0) === act);
+        const gotEnds = actEnds.filter(([k]) => VN.Meta.data.endings[k]).length;
+        if (e.next) { S.flags.prologueEnding = id; VN.State.saveActStart(1); }
         const clues = Object.keys(VN.Clues).filter((k) => S.flags[k]).length;
         const s = el('div', 'screen ending');
         s.style.setProperty('--c', e.color);
         s.innerHTML = `
-          <div class="en-kicker">КОНЕЦ ПРОЛОГА${first ? ' · <b>НОВАЯ КОНЦОВКА</b>' : ''}</div>
+          <div class="en-kicker">${act ? 'КОНЕЦ ГЛАВЫ I' : 'КОНЕЦ ПРОЛОГА'}${first ? ' · <b>НОВАЯ КОНЦОВКА</b>' : ''}</div>
           <div class="en-title">${e.title}</div>
           <div class="en-sub">${e.sub}</div>
           <div class="en-stats">
             <div><b>${VN.State.clock()}</b><span>время</span></div>
-            <div><b>${blocks}/10</b><span>блоков пройдено</span></div>
+            <div><b>${blocks}/${total}</b><span>блоков пройдено</span></div>
             <div><b>${clues}/${Object.keys(VN.Clues).length}</b><span>улик</span></div>
-            <div><b>${Object.keys(VN.Meta.data.endings).length}/8</b><span>концовок открыто</span></div>
+            <div><b>${gotEnds}/${actEnds.length}</b><span>концовок ${act ? 'главы' : 'пролога'}</span></div>
           </div>
-          <div class="en-next">ГЛАВА I · «ЧЁРНАЯ БУХГАЛТЕРИЯ» — СКОРО</div>
-          <div class="en-btns"><button class="btn btn-acid" data-a="new">НОВОЕ ДЕЛО</button><button class="btn btn-ghost" data-a="board">ДОСКА УЛИК</button><button class="btn btn-ghost" data-a="menu">ГЛАВНОЕ МЕНЮ</button></div>`;
+          <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act ? 'ГЛАВА II — СКОРО' : 'Этот путь обрывается здесь'}</div>
+          <div class="en-btns">${e.next ? '<button class="btn btn-acid" data-a="next">ГЛАВА I · «ЧЁРНАЯ БУХГАЛТЕРИЯ» →</button>' : ''}<button class="btn ${e.next ? 'btn-ghost' : 'btn-acid'}" data-a="new">НОВОЕ ДЕЛО</button><button class="btn btn-ghost" data-a="board">ДОСКА УЛИК</button><button class="btn btn-ghost" data-a="menu">ГЛАВНОЕ МЕНЮ</button></div>`;
         s.addEventListener('click', (ev) => ev.stopPropagation());
         s.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', (ev) => {
           ev.stopPropagation();
@@ -193,6 +201,7 @@
           if (a === 'board') { VN.Board.open(); return; }
           s.classList.add('out'); setTimeout(() => s.remove(), 600);
           if (a === 'new') VN.Runner.newGame();
+          if (a === 'next') VN.Runner.start(e.next, 0);
           if (a === 'menu') VN.Title.show();
           resolve(a);
         }));

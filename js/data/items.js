@@ -27,30 +27,38 @@
     map: svg('<path d="M8 14l16-6 16 6 16-6v42l-16 6-16-6-16 6z"/><path d="M24 8v42M40 14v42"/><path d="M14 30l6 4 8-6 6 6" stroke-dasharray="3 3"/>'),
     shilo_knife: svg('<path d="M10 54l10-10M20 44l4 4M24 48l26-34-8 4-22 26z"/><path d="M30 34l3 3M36 26l3 3"/>'),
     key: svg('<rect x="22" y="22" width="20" height="34" rx="3"/><path d="M26 22V10h12v12M29 14h2M33 14h2"/><path d="M28 34h8M28 40h8"/>'),
+    watch: svg('<circle cx="32" cy="36" r="18"/><path d="M32 26v10l7 5M26 10h12M32 10v8"/>'),
+    mirror: svg('<ellipse cx="30" cy="26" rx="16" ry="18"/><path d="M38 40l14 16M24 18c3-4 9-4 12 0"/>'),
+    vodka: svg('<path d="M26 8h12v10l4 8v30H22V26l4-8z"/><path d="M22 34h20M22 46h20"/>'),
+    banana: svg('<path d="M12 18c4 22 18 34 40 30-18-4-28-14-32-30z"/><path d="M12 18l-2-6"/>'),
+    ticket: svg('<path d="M8 20h48v8a4 4 0 0 0 0 8v8H8v-8a4 4 0 0 0 0-8z"/><path d="M24 20v24" stroke-dasharray="3 3"/>'),
+    notebook: svg('<rect x="14" y="8" width="36" height="48" rx="2"/><path d="M20 8v48M26 20h18M26 28h18M26 36h12"/>'),
+    tape: svg('<rect x="8" y="16" width="48" height="32" rx="3"/><circle cx="24" cy="32" r="5"/><circle cx="40" cy="32" r="5"/><path d="M18 44h28"/>'),
+    syringe: svg('<path d="M44 8l12 12M50 14L22 42l-8 0 0-8L42 6M14 50l-6 6M30 26l8 8"/>'),
     cigs: svg('<rect x="14" y="22" width="36" height="32" rx="2"/><path d="M14 30h36M22 22v-8M30 22v-10M38 22v-8"/>'),
   };
 
   VN.Items = {
     revolver: {
-      name: 'Револьвер «Бульдог»', kind: 'weapon', icon: 'revolver', bundle: { bullet: 3 },
+      name: 'Револьвер «Бульдог»', value: 9, kind: 'weapon', icon: 'revolver', bundle: { bullet: 3 },
       desc: 'Короткий ствол, тяжёлый спуск. В барабане три патрона. В бою открывает слот ВЫСТРЕЛ: куб × 2 урона, сквозь любую защиту. Нужны патроны.',
     },
     bullet: {
-      name: 'Патрон .38', kind: 'ammo', icon: 'bullet', tradeable: true,
+      name: 'Патрон .38', value: 2, kind: 'ammo', icon: 'bullet', tradeable: true,
       desc: 'Один выстрел — одна попытка всё исправить.',
     },
     medkit: {
-      name: 'Аптечка', kind: 'heal', icon: 'medkit', tradeable: true, heal: 8,
+      name: 'Аптечка', value: 5, kind: 'heal', icon: 'medkit', tradeable: true, heal: 8,
       use: { field: true, combat: true },
       desc: 'Бинты, спирт, обезболивающее. Восстанавливает 8 здоровья.',
     },
     flask: {
-      name: 'Фляжка коньяка', kind: 'combat', icon: 'flask', tradeable: true, qty: 2,
+      name: 'Фляжка коньяка', value: 4, kind: 'combat', icon: 'flask', tradeable: true, qty: 2,
       use: { combat: true },
       desc: 'Отцовская, на два глотка. В проверке — перебросить кубы после провала. В бою — +2 переброса в этом раунде.',
     },
     firecracker: {
-      name: 'Петарда «Корсар-6»', kind: 'combat', icon: 'firecracker', tradeable: true,
+      name: 'Петарда «Корсар-6»', value: 3, kind: 'combat', icon: 'firecracker', tradeable: true,
       use: { combat: true },
       desc: 'В бою — оглушает противника: его намерение в этом раунде сгорает.',
     },
@@ -63,20 +71,20 @@
       desc: 'Жетон №4417. Его забыли изъять при увольнении. Открывает некоторые двери — и рты.',
     },
     knuckles: {
-      name: 'Кастет', kind: 'weapon', icon: 'knuckles',
+      name: 'Кастет', value: 4, kind: 'weapon', icon: 'knuckles',
       desc: 'Память о подпольном ринге. Пассивно: +1 к УДАРУ.',
     },
     lockpicks: {
-      name: 'Отмычки', kind: 'key', icon: 'lockpicks',
+      name: 'Отмычки', value: 4, kind: 'key', icon: 'lockpicks',
       desc: 'Набор из семи штифтов. Любой замок — это просто вопрос терпения.',
     },
     shawarma: {
-      name: 'Шаурма «Двойная»', kind: 'heal', icon: 'shawarma', tradeable: true, food: true, heal: 10,
+      name: 'Шаурма «Двойная»', value: 3, kind: 'heal', icon: 'shawarma', tradeable: true, food: true, heal: 10,
       use: { field: true, combat: true },
       desc: 'С огненным соусом. Подозрительно вкусная. Восстанавливает 10 здоровья.',
     },
     mandarin: {
-      name: 'Мандарин', kind: 'heal', icon: 'mandarin', tradeable: true, food: true, heal: 3,
+      name: 'Мандарин', value: 1, kind: 'heal', icon: 'mandarin', tradeable: true, food: true, heal: 3,
       use: { field: true, combat: true },
       desc: 'Пахнет Новым годом и детством. Восстанавливает 3 здоровья.',
     },
@@ -93,12 +101,46 @@
       desc: 'Синька 1979 года. Вентиляционный короб ведёт прямо в контору второго этажа.',
     },
     shilo_knife: {
-      name: 'Нож Шила', kind: 'weapon', icon: 'shilo_knife', tradeable: true,
+      name: 'Нож Шила', value: 3, kind: 'weapon', icon: 'shilo_knife', tradeable: true,
       desc: 'Зазубренный, липкий. Пассивно: +1 к УДАРУ.',
     },
     cigs: {
-      name: 'Сигареты «Полночь»', kind: 'trade', icon: 'cigs', tradeable: true, food: true,
+      name: 'Сигареты «Полночь»', value: 3, kind: 'trade', icon: 'cigs', tradeable: true, food: true,
       desc: 'Полпачки. В этом городе — валюта твёрже рубля.',
+    },
+    watch: {
+      name: 'Часы отца', value: 10, kind: 'trade', icon: 'watch', tradeable: true,
+      desc: '«Полёт», позолота, на крышке гравировка «А.К. — за точный счёт». Остановились в 3:47. Стоят дорого. И не только в рублях.',
+    },
+    mirror: {
+      name: 'Зеркальце шулера', value: 4, kind: 'combat', icon: 'mirror', tradeable: true, reveal: true,
+      use: { combat: true },
+      desc: 'Маленькое, в ладони не видно. В бою — заглянуть в скрытые кубы противника до удара.',
+    },
+    vodka: {
+      name: 'Водка «Полярная»', value: 3, kind: 'trade', icon: 'vodka', tradeable: true, food: true,
+      desc: 'Ноль семь. В эту ночь — жидкая валюта.',
+    },
+    banana: {
+      name: 'Банан', value: 1, kind: 'trade', icon: 'banana', tradeable: true, food: true,
+      desc: 'Обычный банан. Для некоторых — нет.',
+    },
+    ticket: {
+      name: 'Билет на 06:40', value: 8, kind: 'key', icon: 'ticket', tradeable: true,
+      desc: 'Поезд «Порт-Ветров — Москва», плацкарт, два места. Ещё можно уехать.',
+    },
+    notebook: {
+      name: 'Тетрадь отца', kind: 'key', icon: 'notebook',
+      desc: 'Столбики цифр, даты, инициалы. На последней странице — снежинка и число 3:47.',
+    },
+    tape: {
+      name: 'Кассета', value: 6, kind: 'key', icon: 'tape', tradeable: true,
+      desc: 'Запись из кабинета Гроха. Голоса, которые в суде звучат громче любых цифр.',
+    },
+    syringe: {
+      name: 'Адреналин', value: 5, kind: 'heal', icon: 'syringe', tradeable: true, heal: 6,
+      use: { field: true, combat: true },
+      desc: 'Из больничного шкафа. Восстанавливает 6 здоровья.',
     },
     key: {
       name: 'Флешка «Ключ»', kind: 'key', icon: 'key',

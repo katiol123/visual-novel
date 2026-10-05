@@ -85,7 +85,7 @@
         case 'choice': return this.choice(c, sc);
         case 'check': {
           this.busy = true;
-          const ok = await VN.Checks.run(c.check);
+          const ok = await VN.Checks.run(typeof c.check === 'function' ? c.check(S) : c.check);
           this.busy = false;
           return { to: ok ? c.passL : c.failL };
         }
@@ -95,6 +95,8 @@
           const opts = Object.assign({ flee: c.flee }, typeof c.opts === 'function' ? c.opts(S) : c.opts || {});
           const res = await VN.Combat.start(c.enemy, opts);
           this.busy = false;
+          // проигрыш не всегда смерть: сюжет продолжается — герой приходит в себя
+          if (res !== 'win' && S.hp <= 0) { S.hp = Math.max(4, Math.round(S.maxHp * 0.2)); VN.bus.emit('state'); }
           return { to: c.labels[res] };
         }
         case 'trade': {
@@ -136,6 +138,18 @@
         if (c.fx === 'laser') S.flags._laser = true;
         if (c.fx === 'nolaser') S.flags._laser = false;
       }
+      if (c.act) {
+        // начало акта: свои часы и дедлайн, раны перевязаны
+        const A = c.act;
+        S.act = A.n;
+        S.clock = { start: A.start, deadline: A.deadline, label: A.label, date: A.date };
+        S.time = A.start;
+        if (A.maxHp) S.maxHp = A.maxHp;
+        S.hp = S.maxHp;
+        VN.bus.emit('state');
+      }
+      if (c.rel) Object.entries(c.rel).forEach(([k, v]) => St.addRel(k, v, c.quiet));
+      if (c.shop) { this.busy = true; await VN.Trade.open(typeof c.shop === 'function' ? c.shop(S) : c.shop); this.busy = false; }
       if (c.time) St.addTime(c.time);
       if (c.setTime != null) { S.time = c.setTime; VN.bus.emit('state'); }
       if (c.set) Object.entries(c.set).forEach(([k, v]) => St.set(k, v));
@@ -181,15 +195,16 @@
             if (!St.has(n)) { locked = true; reason = 'нужно: ' + it.name; }
           });
         }
-        if (o.check) {
-          const st = St.STATS[o.check.stat];
-          tags.push({ t: `🎲 ${st.name} ${o.check.dc} · ${VN.Choices.chance(S.stats[o.check.stat], o.check.dc)}%`, k: 'check-' + o.check.stat });
+        const ck = typeof o.check === 'function' ? o.check(S) : o.check;
+        if (ck) {
+          const st = St.STATS[ck.stat];
+          tags.push({ t: `🎲 ${st.name} ${ck.dc} · ${VN.Choices.chance(S.stats[ck.stat], ck.dc)}%`, k: 'check-' + ck.stat });
         }
         if (o.time) tags.push({ t: `⏱ +${o.time} мин`, k: 'time' });
         if (o.tag) tags.push({ t: o.tag, k: 'flag' });
         if (o.combat) tags.push({ t: '⚔ бой', k: 'fight' });
         const text = typeof o.text === 'function' ? o.text(S) : o.text;
-        shown.push({ k, o, view: { text, tags, locked, reason } });
+        shown.push({ k, o, ck, view: { text, tags, locked, reason } });
       });
       if (!shown.length) { console.warn('Нет доступных вариантов', sc.id, c.id); return undefined; }
 
@@ -197,12 +212,12 @@
       VN.Stage.focus(null);
       const idx = await VN.Choices.show(shown.map((s) => s.view), { timer: c.timer, prompt: c.prompt });
       if (idx < 0) return { to: c.timeoutL };
-      const { k, o } = shown[idx];
+      const { k, o, ck } = shown[idx];
       if (o.once) S.flags[onceKey(k)] = true;
       if (o.time) St.addTime(o.time);
-      if (o.check) {
+      if (ck) {
         this.busy = true;
-        const ok = await VN.Checks.run({ stat: o.check.stat, dc: o.check.dc, label: VN.Typewriter.strip(typeof o.text === 'function' ? o.text(S) : o.text) });
+        const ok = await VN.Checks.run({ stat: ck.stat, dc: ck.dc, label: VN.Typewriter.strip(typeof o.text === 'function' ? o.text(S) : o.text) });
         this.busy = false;
         return { to: ok ? o.passL : o.failL };
       }

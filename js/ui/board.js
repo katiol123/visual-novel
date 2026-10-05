@@ -28,12 +28,20 @@
       const m = VN.Modal.open('board', 'ДОСКА УЛИК', 'Каждая нить — твой выбор. Белые пятна — дороги, которыми ты не пошёл.');
       const wrap = el('div', 'board-wrap');
       const cork = el('div', 'cork');
-      const scenes = VN.Story.blocks();
+      const act = S.act || 0;
       const visited = new Set(S.path);
+      // варианты одного блока (например, разные начала главы) — одна карточка
+      const groups = [];
+      VN.Story.blocks(act).forEach((sc) => {
+        let g = groups.find((x) => x.block === sc.block);
+        if (!g) groups.push((g = { block: sc.block, board: sc.board, loc: sc.loc, title: null, seen: false }));
+        if (visited.has(sc.id)) { g.seen = true; g.title = sc.title; g.loc = sc.loc; }
+      });
+      const scenes = groups;
 
       // нить
-      const order = S.path.filter((id) => (VN.Story.get(id) || {}).block);
-      const pts = order.map((id) => VN.Story.get(id).board);
+      const order = S.path.filter((id) => { const sc = VN.Story.get(id); return sc && sc.block && (sc.act || 0) === act; });
+      const pts = order.map((id) => groups.find((g) => g.block === VN.Story.get(id).block).board);
       const svg = `<svg class="thread" viewBox="0 0 1200 720">${pts.slice(1).map((p, i) => {
         const a = pts[i], mx = (a.x + p.x) / 2, my = Math.max(a.y, p.y) + 40;
         return `<path d="M${a.x} ${a.y - 88} Q${mx} ${my - 88} ${p.x} ${p.y - 88}" style="--d:${i * 120}ms"/>`;
@@ -41,14 +49,14 @@
       cork.innerHTML = svg;
 
       scenes.forEach((sc, i) => {
-        const seen = visited.has(sc.id);
+        const seen = sc.seen;
         const p = el('div', 'polaroid' + (seen ? ' seen' : ''));
         p.style.left = sc.board.x + 'px'; p.style.top = sc.board.y + 'px';
         p.style.setProperty('--r', ((i * 37) % 11 - 5) + 'deg');
         p.style.setProperty('--d', i * 50 + 'ms');
         p.innerHTML = `<i class="pin"></i>
           <div class="pic">${seen ? `<img src="${thumb(sc.loc)}" alt="">` : '<span>?</span>'}</div>
-          <div class="cap"><b>${sc.block}.</b> ${seen ? esc(sc.title) : 'не раскрыто'}</div>`;
+          <div class="cap"><b>${sc.block}.</b> ${seen ? esc(sc.title || '') : 'не раскрыто'}</div>`;
         cork.appendChild(p);
       });
 
@@ -57,8 +65,16 @@
       side.innerHTML = `
         <h3>УЛИКИ <small>${clues.length}/${Object.keys(VN.Clues).length}</small></h3>
         <div class="notes">${clues.length ? clues.map((k, i) => `<div class="note" style="--r:${(i % 3) - 1}deg"><b>${VN.Clues[k].title}</b>${VN.Clues[k].text}</div>`).join('') : '<p class="muted">Пока пусто. Задавай вопросы.</p>'}</div>
-        <h3>КОНЦОВКИ <small>${Object.keys(VN.Meta.data.endings).length}/${Object.keys(VN.Endings).length}</small></h3>
-        <div class="ends">${Object.entries(VN.Endings).map(([id, e]) => {
+        ${(() => {
+          const met = Object.keys(S.met).filter((id) => VN.Characters[id]);
+          if (!met.length || !act) return '';
+          return `<h3>СВЯЗИ</h3><div class="rels">${met.map((id) => {
+            const ch = VN.Characters[id], f = VN.State.friend(id), x = VN.State.foe(id);
+            return `<div class="rel ${f ? 'f' : x ? 'x' : ''}" style="--c:${ch.color}"><b>${ch.short || ch.name}</b><span>${f ? 'друг' : x ? 'враг' : '?'}</span></div>`;
+          }).join('')}</div>`;
+        })()}
+        <h3>КОНЦОВКИ ${act ? 'ГЛАВЫ I' : 'ПРОЛОГА'}</h3>
+        <div class="ends">${Object.entries(VN.Endings).filter(([, e]) => (e.act || 0) === act).map(([id, e]) => {
           const got = VN.Meta.data.endings[id];
           return `<div class="end ${got ? 'got' : ''}" style="--c:${e.color}"><b>${got ? e.title : '? ? ?'}</b><span>${got ? e.sub : 'не открыта'}</span></div>`;
         }).join('')}</div>`;

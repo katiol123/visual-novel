@@ -23,6 +23,9 @@
       stats: { str: 1, agi: 1, nrv: 1 },
       hp: 22, maxHp: 22,
       time: 7,               // минут после 23:00
+      act: 0,                // 0 — пролог, 1 — глава I
+      clock: { start: 0, deadline: 60, label: 'до полуночи', date: '31 ДЕКАБРЯ' },
+      rel: {},               // отношения: ≥2 — друг, ≤−2 — враг
       background: null,      // id предыстории
       flags: {},
       inv: {},
@@ -82,7 +85,19 @@
       const h = Math.floor(tot / 60) % 24, m = ((tot % 60) + 60) % 60;
       return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     },
-    minutesLeft() { return Math.max(0, DEADLINE - VN.S.time); },
+    minutesLeft() { return Math.max(0, VN.S.clock.deadline - VN.S.time); },
+    late() { return VN.S.time >= VN.S.clock.deadline; },
+
+    /* ---- отношения ----
+       Тосты нарочно не говорят «+» или «−»: игрок узнаёт итог по поступкам героев. */
+    rel(id) { return VN.S.rel[id] || 0; },
+    friend(id) { return this.rel(id) >= 2; },
+    foe(id) { return this.rel(id) <= -2; },
+    addRel(id, n, quiet) {
+      VN.S.rel[id] = (VN.S.rel[id] || 0) + n;
+      if (!quiet) VN.bus.emit('rel', { id, n });
+      VN.bus.emit('state');
+    },
 
     /* ---- здоровье ---- */
     heal(n) {
@@ -120,6 +135,11 @@
       data.sceneTitle = (VN.Story.get(data.pointer && data.pointer.scene) || {}).title || '';
       return store(KEY + slot, data);
     },
+    /** Снимок состояния на старте главы (решения пролога переходят в главу I). */
+    saveActStart(n) { return store(KEY + 'act' + n, VN.util.clone(VN.S)); },
+    peekActStart(n) { const d = fetchJSON(KEY + 'act' + n); return d && d.v === SAVE_V ? d : null; },
+    loadActStart(n) { const d = this.peekActStart(n); if (!d) return null; VN.S = Object.assign(fresh(), d); VN.bus.emit('state'); return VN.S; },
+
     peek(slot) { const d = fetchJSON(KEY + slot); return d && d.v === SAVE_V ? d : null; },
     load(slot) {
       const d = this.peek(slot);

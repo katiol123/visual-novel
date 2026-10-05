@@ -106,6 +106,10 @@
         const it = VN.Items[id]; if (!it) return;
         Toast.show(`<small>ПОТЕРЯНО</small><b>${it.name}${n > 1 ? ' ×' + n : ''}</b>`, 'lost', VN.Icons[it.icon]);
       });
+      VN.bus.on('rel', ({ id }) => {
+        const ch = VN.Characters[id]; if (!ch) return;
+        Toast.show(`<small>ОТНОШЕНИЯ</small><b>${ch.short || ch.name} это запомнит.</b>`, 'rel');
+      });
       VN.bus.on('clue', (k) => {
         const c = VN.Clues[k];
         VN.Audio.sfx('clue');
@@ -131,10 +135,13 @@
       const S = VN.S, r = this.root;
       if (!r) return;
       const left = VN.State.minutesLeft();
+      const C = S.clock;
       $('.clk-time', r).textContent = VN.State.clock();
-      $('.clk-left b', r).textContent = left;
-      r.querySelectorAll('.clk-bar i').forEach((i, k) => i.classList.toggle('gone', k < S.time));
-      $('.hud-clock', r).classList.toggle('urgent', left <= 15);
+      $('.clk-label', r).textContent = C.date;
+      $('.clk-left', r).innerHTML = `${C.label} <b>${left}</b> мин`;
+      const gone = Math.round(((S.time - C.start) / (C.deadline - C.start)) * 60);
+      r.querySelectorAll('.clk-bar i').forEach((i, k) => i.classList.toggle('gone', k < gone));
+      $('.hud-clock', r).classList.toggle('urgent', left <= Math.max(15, (C.deadline - C.start) * 0.15));
       $('.hp-num', r).textContent = `${S.hp}/${S.maxHp}`;
       $('.hud-vitals', r).classList.toggle('low', S.hp <= S.maxHp * 0.3);
       $('.hud-stats', r).innerHTML = Object.entries(VN.State.STATS)

@@ -119,8 +119,9 @@
       }
       return s;
     },
-    blocks() {
-      return Object.values(scenes).filter((s) => s.block).sort((a, b) => a.block - b.block);
+    /** Сцены-блоки акта (для доски улик). Несколько сцен могут делить один блок — это варианты. */
+    blocks(act) {
+      return Object.values(scenes).filter((s) => s.block && (act == null || (s.act || 0) === act)).sort((a, b) => a.block - b.block);
     },
     all() { return scenes; },
   };

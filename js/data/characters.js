@@ -95,5 +95,41 @@
         threat: 5, stamp: 'ЛИКВИДАТОР', stampColor: '#ff2a4d',
       },
     },
+    /* ---------- глава I ---------- */
+    soroka: {
+      name: '«СОРОКА»', short: 'СОРОКА', color: '#ff7ad9', tag: 'карманница',
+      sprite: SP + 'shilo.png', placeholder: true,
+      dossier: { no: '7171', role: 'Карманные кражи · 14 приводов', quote: 'Что упало — то её. Что не упало — тоже.', threat: 1, stamp: 'ЛИПКИЕ ПАЛЬЦЫ', stampColor: '#ff7ad9' },
+    },
+    valya: {
+      name: 'ТЁТЯ ВАЛЯ', short: 'ВАЛЯ', color: '#ffd28a', tag: 'барахолка',
+      sprite: SP + 'shilo.png', placeholder: true,
+      dossier: { no: '1950', role: 'Торговля с рук · 40 лет стажа', quote: 'Продаст ёлку в июле.', threat: 1, stamp: 'ТОРГУЕТ', stampColor: '#ffd28a' },
+    },
+    prof: {
+      name: 'ПРОФЕССОР', short: 'ПРОФЕССОР', color: '#7fd6ff', tag: 'клуб «Пиксель»',
+      sprite: SP + 'shilo.png', placeholder: true,
+      dossier: { no: '1024', role: 'Взлом · шифры · бывший доцент', quote: 'Пароль — это всегда человек.', threat: 1, stamp: 'ЦИФРА', stampColor: '#7fd6ff' },
+    },
+    sanitar: {
+      name: '«САНИТАР»', short: 'САНИТАР', color: '#d8e0dc', tag: 'больница №2',
+      sprite: SP + 'shilo.png', placeholder: true,
+      dossier: { no: '0303', role: 'Чистильщик БНК · медицинский профиль', quote: 'Укол — и спать.', threat: 2, stamp: 'БНК', stampColor: '#ff2a4d' },
+    },
+    banshik: {
+      name: '«БАНЩИК»', short: 'БАНЩИК', color: '#ffb08a', tag: 'Баня №7',
+      sprite: SP + 'shilo.png', placeholder: true,
+      dossier: { no: '0007', role: 'Охрана Совета · парилка', quote: 'С лёгким паром.', threat: 2, stamp: 'БНК', stampColor: '#ff2a4d' },
+    },
+    povar: {
+      name: '«ПОВАР»', short: 'ПОВАР', color: '#ff6a3d', tag: 'кухня «Вертела»',
+      sprite: SP + 'shilo.png', placeholder: true,
+      dossier: { no: '2425', role: 'Личный нож Счетовода', quote: 'Режет тоньше бумаги.', threat: 3, stamp: 'БНК', stampColor: '#ff2a4d' },
+    },
+    schetovod: {
+      name: 'ШЕФ · «СЧЕТОВОД»', short: 'СЧЕТОВОД', color: '#ffb02e', tag: 'глава БНК',
+      sprite: SP + 'shef.png',
+      dossier: { no: '0000', role: 'Глава Братства Ночного Канала', quote: 'Всё в этом городе — начинка.', threat: 5, stamp: 'СЧЕТОВОД', stampColor: '#ffb02e' },
+    },
   };
 })();
