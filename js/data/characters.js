@@ -13,7 +13,7 @@
     yan: { name: 'ЯН КОРСАК', short: 'ЯН', color: '#e8e2d0', tag: 'это ты', style: 'self' },
 
     mika: { name: 'МИКА', color: '#7fd6ff', tag: 'голос в трубке', style: 'phone' },
-    mk: { name: 'МИКА', color: '#7fd6ff', tag: 'младший брат' },
+    mk: { name: 'МИКА', color: '#7fd6ff', tag: 'младший брат', sprite: SP + 'mika.png' },
     radio: { name: 'РАЦИЯ · КАНАЛ 9', color: '#c9d4c2', tag: 'капитан Грох', style: 'phone' },
 
     kir: {
@@ -98,32 +98,32 @@
     /* ---------- глава I ---------- */
     soroka: {
       name: '«СОРОКА»', short: 'СОРОКА', color: '#ff7ad9', tag: 'карманница',
-      sprite: SP + 'shilo.png', placeholder: true,
+      sprite: SP + 'soroka.png',
       dossier: { no: '7171', role: 'Карманные кражи · 14 приводов', quote: 'Что упало — то её. Что не упало — тоже.', threat: 1, stamp: 'ЛИПКИЕ ПАЛЬЦЫ', stampColor: '#ff7ad9' },
     },
     valya: {
       name: 'ТЁТЯ ВАЛЯ', short: 'ВАЛЯ', color: '#ffd28a', tag: 'барахолка',
-      sprite: SP + 'shilo.png', placeholder: true,
+      sprite: SP + 'valya.png',
       dossier: { no: '1950', role: 'Торговля с рук · 40 лет стажа', quote: 'Продаст ёлку в июле.', threat: 1, stamp: 'ТОРГУЕТ', stampColor: '#ffd28a' },
     },
     prof: {
       name: 'ПРОФЕССОР', short: 'ПРОФЕССОР', color: '#7fd6ff', tag: 'клуб «Пиксель»',
-      sprite: SP + 'shilo.png', placeholder: true,
+      sprite: SP + 'prof.png',
       dossier: { no: '1024', role: 'Взлом · шифры · бывший доцент', quote: 'Пароль — это всегда человек.', threat: 1, stamp: 'ЦИФРА', stampColor: '#7fd6ff' },
     },
     sanitar: {
       name: '«САНИТАР»', short: 'САНИТАР', color: '#d8e0dc', tag: 'больница №2',
-      sprite: SP + 'shilo.png', placeholder: true,
+      sprite: SP + 'sanitar.png',
       dossier: { no: '0303', role: 'Чистильщик БНК · медицинский профиль', quote: 'Укол — и спать.', threat: 2, stamp: 'БНК', stampColor: '#ff2a4d' },
     },
     banshik: {
       name: '«БАНЩИК»', short: 'БАНЩИК', color: '#ffb08a', tag: 'Баня №7',
-      sprite: SP + 'shilo.png', placeholder: true,
+      sprite: SP + 'banshik.png',
       dossier: { no: '0007', role: 'Охрана Совета · парилка', quote: 'С лёгким паром.', threat: 2, stamp: 'БНК', stampColor: '#ff2a4d' },
     },
     povar: {
       name: '«ПОВАР»', short: 'ПОВАР', color: '#ff6a3d', tag: 'кухня «Вертела»',
-      sprite: SP + 'shilo.png', placeholder: true,
+      sprite: SP + 'povar.png',
       dossier: { no: '2425', role: 'Личный нож Счетовода', quote: 'Режет тоньше бумаги.', threat: 3, stamp: 'БНК', stampColor: '#ff2a4d' },
     },
     schetovod: {

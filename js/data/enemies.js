@@ -80,7 +80,7 @@
     /* ======================= ГЛАВА I =======================
        char — чей это персонаж (досье, имя), threat — уровень опасности. */
     soroka: {
-      char: 'soroka', threat: 1, name: '«СОРОКА»', sprite: SP + 'shilo.png', color: '#ff7ad9',
+      char: 'soroka', threat: 1, name: '«СОРОКА»', sprite: SP + 'soroka.png', color: '#ff7ad9',
       hp: 30, hidden: 1, armor: 0, passives: [{ id: 'steal' }],
       moves: [
         { name: 'Подсечка', type: 'attack', dice: 2, bonus: 2, w: 3, desc: 'Низко и быстро.' },
@@ -91,7 +91,7 @@
       hurt: ['Ай!', 'Так нечестно!', 'Пусти!'],
     },
     sanitar: {
-      char: 'sanitar', threat: 2, name: '«САНИТАР»', sprite: SP + 'shilo.png', color: '#d8e0dc',
+      char: 'sanitar', threat: 2, name: '«САНИТАР»', sprite: SP + 'sanitar.png', color: '#d8e0dc',
       hp: 99, hidden: 1, armor: 0, passives: [{ id: 'poison', stack: 1 }],
       moves: [
         { name: 'Шприц', type: 'attack', dice: 1, bonus: 2, w: 3, desc: 'Попадание — стак яда.' },
@@ -102,7 +102,7 @@
       hurt: ['Тьфу.', 'Неаккуратно.', 'Ах ты…'],
     },
     banshik: {
-      char: 'banshik', threat: 2, name: '«БАНЩИК»', sprite: SP + 'shilo.png', color: '#ffb08a',
+      char: 'banshik', threat: 2, name: '«БАНЩИК»', sprite: SP + 'banshik.png', color: '#ffb08a',
       hp: 94, hidden: 0, armor: 0, passives: [{ id: 'steam', rounds: 2 }],
       moves: [
         { name: 'Дубовый веник', type: 'attack', dice: 2, bonus: 3, w: 3, desc: 'С оттяжкой.' },
@@ -124,7 +124,7 @@
       hurt: ['С-сука!', 'Ай!..', 'Ты чё?!'],
     },
     povar: {
-      char: 'povar', threat: 3, name: '«ПОВАР»', sprite: SP + 'shilo.png', color: '#ff6a3d',
+      char: 'povar', threat: 3, name: '«ПОВАР»', sprite: SP + 'povar.png', color: '#ff6a3d',
       hp: 45, hidden: 2, armor: 0, passives: [{ id: 'cleaver' }],
       moves: [
         { name: 'Веер ножей', type: 'attack', dice: 3, bonus: 4, w: 3, desc: 'Три ножа веером.' },
