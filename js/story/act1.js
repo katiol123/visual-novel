@@ -54,11 +54,11 @@
           // Шеф — его отношение решит одну из концовок
           if (F.shefPolite) R('shef', 2); if (F.shefThreatened) R('shef', -1); if (F.shefHumiliated) R('shef', -3); if (F.shefBeaten) R('shef', -2);
           // Техас
-          if (F.drankTexas) R('texas', 1); if (F.traded_texas || F.boughtAmmo || has('map')) R('texas', 1);
+          if (F.drankTexas) R('texas', 1); if (F.sniperFromTexas && F.sniperDodged) R('texas', 1); if (F.traded_texas || F.boughtAmmo || has('map')) R('texas', 1);
           // Конг
           if (F.kongBeaten) R('kong', -3); if (F.kongFooled) R('kong', -1); if (F.kongKir) R('kong', 1);
           // Дед
-          if (F.yanShot) R('ded', 3); if (F.dedFirework) R('ded', 1); if (F.dedBlinded) R('ded', -2); if (F.grokhCalled) R('ded', -1);
+          if (F.yanShot) R('ded', 3); if (F.sniperDodged) R('ded', 1); if (F.dedFirework) R('ded', 1); if (F.dedBlinded) R('ded', -2); if (F.grokhCalled) R('ded', -1);
           // Кир
           if (F.kirLeft) R('kir', 3); if (F.kirConfessed) R('kir', 1); if (F.kirTookKey) R('kir', -1);
           // Грох

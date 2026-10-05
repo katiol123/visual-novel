@@ -210,7 +210,7 @@
 
       VN.State.save('auto');
       VN.Stage.focus(null);
-      const idx = await VN.Choices.show(shown.map((s) => s.view), { timer: c.timer, prompt: c.prompt });
+      const idx = await VN.Choices.show(shown.map((s) => s.view), { timer: typeof c.timer === 'function' ? c.timer(S) : c.timer, prompt: c.prompt });
       if (idx < 0) return { to: c.timeoutL };
       const { k, o, ck } = shown[idx];
       if (o.once) S.flags[onceKey(k)] = true;
