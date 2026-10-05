@@ -15,10 +15,11 @@
     nrv: { name: 'НЕРВЫ', short: 'НРВ', color: '#c27bff' },
   };
   const DEADLINE = 60; // минут после 23:00 → полночь
+  const SAVE_V = 2;   // v2: персонажи переименованы (Шило, Конг, Техас) — старые сейвы несовместимы
 
   function fresh() {
     return {
-      v: 1,
+      v: SAVE_V,
       stats: { str: 1, agi: 1, nrv: 1 },
       hp: 22, maxHp: 22,
       time: 7,               // минут после 23:00
@@ -102,7 +103,7 @@
       let atkBonus = Math.max(0, S.stats.str - 1);
       if (this.has('knuckles')) atkBonus += 1;
       if (bg === 'cop') atkBonus += 2; // выучка опера
-      if (this.has('frog_knife')) atkBonus += 1;
+      if (this.has('shilo_knife')) atkBonus += 1;
       return {
         dice: 3 + (bg === 'thief' ? 1 : 0),
         rerolls: 1 + (bg === 'cop' ? 2 : 0),
@@ -119,9 +120,9 @@
       data.sceneTitle = (VN.Story.get(data.pointer && data.pointer.scene) || {}).title || '';
       return store(KEY + slot, data);
     },
-    peek(slot) { return fetchJSON(KEY + slot); },
+    peek(slot) { const d = fetchJSON(KEY + slot); return d && d.v === SAVE_V ? d : null; },
     load(slot) {
-      const d = fetchJSON(KEY + slot);
+      const d = this.peek(slot);
       if (!d) return null;
       VN.S = Object.assign(fresh(), d);
       VN.bus.emit('state');

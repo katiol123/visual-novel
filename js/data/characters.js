@@ -18,7 +18,7 @@
 
     kir: {
       name: 'КИР ВОЛЬСКИЙ', short: 'КИР', color: '#b6ff3b', tag: 'бывший напарник',
-      sprite: SP + 'sofa.png',
+      sprite: SP + 'kir.png',
       dossier: {
         no: '0412', role: 'Частный сыск · экс-опер Участка 13',
         quote: 'Знает всех. Должен всем.',
@@ -28,7 +28,7 @@
 
     grokh: {
       name: 'КАПИТАН ГРОХ', short: 'ГРОХ', color: '#c9d4c2', tag: 'начальник Участка 13',
-      sprite: SP + 'plumber.png',
+      sprite: SP + 'grokh.png',
       dossier: {
         no: '0013', role: 'Капитан полиции · 24 года в органах',
         quote: 'Закон в этом районе — это он.',
@@ -38,7 +38,7 @@
 
     shef: {
       name: '«ШЕФ»', short: 'ШЕФ', color: '#ffb02e', tag: 'шаурма «Вертел 24»',
-      sprite: SP + 'shawarma.png',
+      sprite: SP + 'shef.png',
       dossier: {
         no: '2424', role: 'Владелец шаурмичной · кассир БНК',
         quote: 'Режет мясо. И не только.',
@@ -46,19 +46,19 @@
       },
     },
 
-    frog: {
-      name: '«ЖАБА»', short: 'ЖАБА', color: '#8dff6a', tag: 'хозяин переулка',
-      sprite: SP + 'frog.png',
+    shilo: {
+      name: '«ШИЛО»', short: 'ШИЛО', color: '#8dff6a', tag: 'хозяин переулка',
+      sprite: SP + 'shilo.png',
       dossier: {
         no: '6613', role: 'Уличный грабитель · два ножа, ноль тормозов',
-        quote: 'Квакает перед ударом.',
+        quote: 'Свистит перед ударом.',
         threat: 1, stamp: 'ОПАСЕН', stampColor: '#8dff6a',
       },
     },
 
-    pelmen: {
-      name: 'СЁМА «ПЕЛЬМЕНЬ»', short: 'ПЕЛЬМЕНЬ', color: '#9be15d', tag: 'контрабандист',
-      sprite: SP + 'dumpling.png',
+    texas: {
+      name: 'СЁМА «ТЕХАС»', short: 'ТЕХАС', color: '#9be15d', tag: 'контрабандист',
+      sprite: SP + 'texas.png',
       dossier: {
         no: '0777', role: 'Контрабанда · скупка · слухи',
         quote: 'Продаст тебе твою же тень. Со скидкой.',
@@ -66,9 +66,9 @@
       },
     },
 
-    goose: {
-      name: '«ГУСЬ»', short: 'ГУСЬ', color: '#ffe14d', tag: 'охрана БНК',
-      sprite: SP + 'goose.png',
+    kong: {
+      name: '«КОНГ»', short: 'КОНГ', color: '#ffe14d', tag: 'охрана БНК',
+      sprite: SP + 'kong.png',
       dossier: {
         no: '1987', role: 'Боевик БНК · охрана объектов',
         quote: 'Не спрашивай про бананы.',
@@ -78,7 +78,7 @@
 
     bugai: {
       name: 'ТАРАС «БУГАЙ»', short: 'БУГАЙ', color: '#c27bff', tag: 'правая рука БНК',
-      sprite: SP + 'cat.png',
+      sprite: SP + 'bugai.png',
       dossier: {
         no: '0001', role: 'Силовое крыло БНК · 3 судимости, 0 сроков',
         quote: 'Бьёт один раз. Больше не нужно.',
@@ -88,7 +88,7 @@
 
     ded: {
       name: '«ДЕД»', short: 'ДЕД', color: '#ff2a4d', tag: 'снайпер БНК',
-      sprite: SP + 'granny.png',
+      sprite: SP + 'ded.png',
       dossier: {
         no: '3112', role: 'Снайпер · работает только в праздники',
         quote: 'Подарки получают не все.',

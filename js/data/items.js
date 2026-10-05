@@ -25,7 +25,7 @@
     radio: svg('<rect x="18" y="18" width="28" height="40" rx="4"/><path d="M26 18V6M24 28h16M24 34h16M24 40h16"/><circle cx="32" cy="50" r="3"/>'),
     grokh_file: svg('<path d="M8 16h18l4 6h26v32H8z"/><path d="M16 32h32M16 40h24M16 48h18"/>'),
     map: svg('<path d="M8 14l16-6 16 6 16-6v42l-16 6-16-6-16 6z"/><path d="M24 8v42M40 14v42"/><path d="M14 30l6 4 8-6 6 6" stroke-dasharray="3 3"/>'),
-    frog_knife: svg('<path d="M10 54l10-10M20 44l4 4M24 48l26-34-8 4-22 26z"/><path d="M30 34l3 3M36 26l3 3"/>'),
+    shilo_knife: svg('<path d="M10 54l10-10M20 44l4 4M24 48l26-34-8 4-22 26z"/><path d="M30 34l3 3M36 26l3 3"/>'),
     key: svg('<rect x="22" y="22" width="20" height="34" rx="3"/><path d="M26 22V10h12v12M29 14h2M33 14h2"/><path d="M28 34h8M28 40h8"/>'),
     cigs: svg('<rect x="14" y="22" width="36" height="32" rx="2"/><path d="M14 30h36M22 22v-8M30 22v-10M38 22v-8"/>'),
   };
@@ -92,8 +92,8 @@
       name: 'Схема хладокомбината', kind: 'key', icon: 'map',
       desc: 'Синька 1979 года. Вентиляционный короб ведёт прямо в контору второго этажа.',
     },
-    frog_knife: {
-      name: 'Нож Жабы', kind: 'weapon', icon: 'frog_knife', tradeable: true,
+    shilo_knife: {
+      name: 'Нож Шила', kind: 'weapon', icon: 'shilo_knife', tradeable: true,
       desc: 'Зазубренный, липкий. Пассивно: +1 к УДАРУ.',
     },
     cigs: {

@@ -9,27 +9,27 @@
    hidden: сколько кубов атаки противник прячет «рубашкой вверх»
 
    Баланс откалиброван симуляцией (бот, полное ХП, 1 аптечка), доля поражений:
-   Жаба ~1% (бот теряет ~10 ХП) · Шеф ~15% · Грох ~30% · Гусь ~45% · Бугай ~60%
+   Шило ~1% (бот теряет ~10 ХП) · Шеф ~15% · Грох ~30% · Конг ~45% · Бугай ~60%
    ========================================================================== */
 (function () {
   'use strict';
   const SP = 'assets/sprites/';
 
   window.VN.Enemies = {
-    frog: {
-      name: '«ЖАБА»', sprite: SP + 'frog.png', color: '#8dff6a',
+    shilo: {
+      name: '«ШИЛО»', sprite: SP + 'shilo.png', color: '#8dff6a',
       hp: 46, hidden: 1, armor: 0,
       moves: [
         { name: 'Двойной порез', type: 'attack', dice: 2, bonus: 4, w: 3, pairEffect: 'bleed', desc: 'Пара на кубах → кровотечение.' },
-        { name: 'Ква-а-а!', type: 'attack', dice: 1, bonus: 7, w: 2, desc: 'Прыжок с воплем.' },
+        { name: 'Фьюи-и-ить!', type: 'attack', dice: 1, bonus: 7, w: 2, desc: 'Свист — и выпад.' },
         { name: 'Присел в тени', type: 'guard', dice: 2, w: 1, desc: 'Блокирует твой удар.' },
       ],
-      taunts: ['Ква.', 'Ботиночки, ква!', 'Я тебя на ленточки, ква-ква!', 'Не дёргайся — будет ровнее.'],
-      hurt: ['КВА!', 'Ай-ква…', 'Ты чё?!'],
+      taunts: ['Фьють.', 'Ботиночки-то какие…', 'Вжик-вжик. Слышишь?', 'Не дёргайся — будет ровнее.'],
+      hurt: ['С-сука!', 'Ай!..', 'Ты чё?!'],
     },
 
     shef: {
-      name: '«ШЕФ»', sprite: SP + 'shawarma.png', color: '#ffb02e',
+      name: '«ШЕФ»', sprite: SP + 'shef.png', color: '#ffb02e',
       hp: 66, hidden: 1, armor: 0,
       moves: [
         { name: 'Шаурмомёт', type: 'attack', dice: 2, bonus: 6, w: 3, desc: 'Ствол в лаваше.' },
@@ -41,7 +41,7 @@
     },
 
     grokh: {
-      name: 'КАПИТАН ГРОХ', sprite: SP + 'plumber.png', color: '#c9d4c2',
+      name: 'КАПИТАН ГРОХ', sprite: SP + 'grokh.png', color: '#c9d4c2',
       hp: 70, hidden: 1, armor: 1,
       moves: [
         { name: 'Дубинка', type: 'attack', dice: 2, bonus: 6, w: 3, desc: 'Резиновое правосудие.' },
@@ -52,8 +52,8 @@
       hurt: ['Ты труп, Корсак.', 'Ах ты…', 'Сержант!'],
     },
 
-    goose: {
-      name: '«ГУСЬ»', sprite: SP + 'goose.png', color: '#ffe14d',
+    kong: {
+      name: '«КОНГ»', sprite: SP + 'kong.png', color: '#ffe14d',
       hp: 65, hidden: 1, armor: 0,
       moves: [
         { name: 'Банановый шквал', type: 'barrage', dice: 4, bonus: 3, w: 3, desc: 'Четыре куба, но 1–2 — промах.' },
@@ -65,7 +65,7 @@
     },
 
     bugai: {
-      name: 'ТАРАС «БУГАЙ»', sprite: SP + 'cat.png', color: '#c27bff',
+      name: 'ТАРАС «БУГАЙ»', sprite: SP + 'bugai.png', color: '#c27bff',
       hp: 93, hidden: 1, armor: 2, boss: true,
       moves: [
         { name: 'Кулак', type: 'attack', dice: 2, bonus: 6, w: 3, desc: 'Как отбойный молоток.' },

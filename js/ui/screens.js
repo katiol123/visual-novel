@@ -23,7 +23,7 @@
       VN.Audio.scene(VN.Locations.street);
       if (this.node) this.node.remove();
       const t = (this.node = el('div', 'title-screen'));
-      const cast = ['frog', 'shef', 'grokh', 'kir', 'pelmen', 'goose', 'bugai', 'ded'];
+      const cast = ['shilo', 'shef', 'grokh', 'kir', 'texas', 'kong', 'bugai', 'ded'];
       const hasSave = !!VN.State.peek('auto');
       const ends = Object.keys(VN.Meta.data.endings).length;
       t.innerHTML = `
