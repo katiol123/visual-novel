@@ -112,12 +112,13 @@
 
       // ---- простые команды; порядок ключей важен ----
       if (c.bg) {
-        const loc = VN.Locations[c.bg];
+        const bgId = typeof c.bg === 'function' ? c.bg(S) : c.bg; // фон может зависеть от состояния
+        const loc = VN.Locations[bgId];
         await VN.Trans.run(c.trans || 'fade', async () => {
           VN.Stage.clearInstant();
           VN.Fx.laser(false); S.flags._laser = false;
-          VN.Backdrop.set(c.bg);
-          S.stage.bg = c.bg;
+          VN.Backdrop.set(bgId);
+          S.stage.bg = bgId;
           VN.Dialogue.hide();
         });
         if (c.amb) VN.Audio.ambient(c.amb); else VN.Audio.scene(loc);

@@ -23,6 +23,9 @@
      sway        — качка (трамвай): в нечётных раундах твой БЛОК −blk
      clinch      — грязный клинч: если ты погасил его удар целиком, он виснет на тебе — −1 куб в следующем раунде
      sedate      — наркоз: каждый every-й раунд у тебя на dice кубов меньше (игла достала)
+     verdict     — приговор: когда твоё ХП ≤ at·макс, его атаки сильнее на atk
+     thirdRound  — «третий раунд»: в раунде round его атака умножается на mult
+     protocol    — протокол: каждая его «защита» навсегда добавляет +atk к его атакам
      lastWord    — «последнее слово»: при ≤ at·ХП один раз закрывается — следующий ход всегда moves[move]
 
    МОДИФИКАТОРЫ БОЯ (VN.CombatMods, передаются сюжетом через opts.mods):
@@ -137,7 +140,11 @@
       }
       const dr = P(def, 'drunk');
       if (dr && attacking) bonus += dr.atk;
-      const value = m.type === 'charge' ? 0 : sumOf(vals) + bonus;
+      const vd = P(def, 'verdict');
+      if (vd && attacking && st.player.hp <= st.player.maxHp * vd.at) { bonus += vd.atk; if (!e.verdict) { e.verdict = true; log.push({ t: 'ПРИГОВОР', sub: `ты слабеешь — его атаки +${vd.atk}`, kind: 'bad' }); } }
+      let value = m.type === 'charge' ? 0 : sumOf(vals) + bonus;
+      const tr = P(def, 'thirdRound');
+      if (tr && attacking && st.round === tr.round) { value *= tr.mult; log.push({ t: 'ТРЕТИЙ РАУНД', sub: `его удар ×${tr.mult}`, kind: 'bad' }); }
       let nHidden = attacking ? Math.min(def.hidden || 0, vals.length) : 0;
       const steam = P(def, 'steam');
       if (steam && st.round <= steam.rounds && m.dice) { nHidden = vals.length; if (st.round === 1) log.push({ t: 'ПАР', sub: `${steam.rounds} раунда кубы не видно`, kind: 'bad' }); }
@@ -151,6 +158,8 @@
         intent.altVals = alt;
       }
       if (m.type === 'guard') e.guard = value;
+      const pr = P(def, 'protocol');
+      if (pr && m.type === 'guard') { e.atkMod += pr.atk; log.push({ t: 'ПРОТОКОЛ', sub: `записал тебя: его атаки +${pr.atk} до конца боя`, kind: 'bad' }); }
       const ga = P(def, 'getaway');
       if (ga && m.type === 'guard') { e.steps = (e.steps || 0) + 1; log.push({ t: 'К ВЫХОДУ', sub: `шаг ${e.steps} из ${ga.steps}`, kind: 'bad' }); }
       e.lastType = m.type;
@@ -254,6 +263,9 @@
         bolt: (p) => ['НЕ БОЕЦ', `при ${Math.round(p.at * 100)}% здоровья сбежит`],
         sway: (p) => ['КАЧКА', `в нечётных раундах трамвай кренится: твой БЛОК −${p.blk}`],
         clinch: () => ['ГРЯЗНЫЙ КЛИНЧ', 'погасишь удар целиком — повиснет на тебе: −1 куб в следующем раунде'],
+        verdict: (p) => ['ПРИГОВОР', `когда у тебя ≤${Math.round(p.at * 100)}% здоровья, его атаки +${p.atk}`],
+        thirdRound: (p) => ['ТРЕТИЙ РАУНД', `в ${p.round}-м раунде его удар ×${p.mult}`],
+        protocol: (p) => ['ПРОТОКОЛ', `каждая его защита — +${p.atk} к атакам до конца боя`],
         sedate: (p) => ['НАРКОЗ', `каждый ${p.every}-й раунд у тебя −${p.dice} куба`],
         lastWord: (p) => [p.name || 'ПОСЛЕДНЕЕ СЛОВО', `при ≤${Math.round(p.at * 100)}% здоровья один раз уходит в глухую защиту`],
         getaway: (p) => ['К ОКНУ', `каждая его защита — шаг к выходу; ${p.steps}-й шаг — и он ушёл`],

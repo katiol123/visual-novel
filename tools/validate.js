@@ -28,14 +28,14 @@ for (const id of Object.keys(scenes)) {
     if (c.op === 'combat') chk(VN.Enemies[c.enemy], `${at}: враг «${c.enemy}»`);
     if (c.give) { const g = Array.isArray(c.give) ? c.give[0] : c.give; chk(VN.Items[g], `${at}: give «${g}»`); }
     if (c.take) { const g = Array.isArray(c.take) ? c.take[0] : c.take; chk(VN.Items[g], `${at}: take «${g}»`); }
-    if (c.bg) chk(VN.Locations[c.bg], `${at}: локация «${c.bg}»`);
+    if (c.bg && typeof c.bg !== 'function') chk(VN.Locations[c.bg], `${at}: локация «${c.bg}»`);
     if (c.shop && typeof c.shop === 'string') chk(VN.Merchants[c.shop], `${at}: торговец «${c.shop}»`);
     if (c.ending) chk(VN.Endings[c.ending], `${at}: концовка «${c.ending}»`);
     if (c.rel) Object.keys(c.rel).forEach((k) => chk(VN.Characters[k], `${at}: rel «${k}»`));
   });
   if (sc.loc) chk(VN.Locations[sc.loc], `${id}: loc «${sc.loc}»`);
 }
-for (const [id, e] of Object.entries(VN.Enemies)) (e.passives || []).forEach((p) => chk(['steal', 'poison', 'reinforce', 'steam', 'reads', 'enrage', 'secondWind', 'doubleBook', 'longRange', 'thorns', 'drunk', 'cleaver', 'audit', 'cold', 'bolt', 'getaway', 'clinch', 'sway', 'sedate', 'lastWord'].includes(p.id), `враг ${id}: пассивка ${p.id}`));
+for (const [id, e] of Object.entries(VN.Enemies)) (e.passives || []).forEach((p) => chk(['steal', 'poison', 'reinforce', 'steam', 'reads', 'enrage', 'secondWind', 'doubleBook', 'longRange', 'thorns', 'drunk', 'cleaver', 'audit', 'cold', 'bolt', 'getaway', 'clinch', 'sway', 'sedate', 'lastWord', 'verdict', 'thirdRound', 'protocol'].includes(p.id), `враг ${id}: пассивка ${p.id}`));
 const ends = Object.keys(VN.Endings), used = new Set();
 for (const id of Object.keys(scenes)) VN.Story.get(id).compiled.forEach((c) => c.ending && used.add(c.ending));
 ends.forEach((e) => chk(used.has(e), `концовка «${e}» нигде не вызывается`));
