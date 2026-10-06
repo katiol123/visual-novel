@@ -600,7 +600,7 @@
   scene('gate', {
     title: 'Ворота хладокомбината', block: 7, loc: 'gate', board: { x: 810, y: 160 },
     script: [
-      { if: late, then: [{ goto: 'ending_late' }] },
+      { if: late, then: [{ set: { lateAtGate: true } }, { goto: 'ending_late' }] },
       { bg: 'gate', trans: 'blinds' },
       { place: 'Хладокомбинат №3 · проходная' },
       { n: 'Хладокомбинат №3. Я не был здесь десять лет. Ворота всё те же — только ржавчины больше, а надежды меньше.' },
