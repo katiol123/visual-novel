@@ -83,7 +83,7 @@ function fight(def, build) {
         if (m.onHit === 'cuff') p.cuff = true;
         if (m.pairEffect === 'bleed' && intent.pair) p.bleed = 2;
         R.afterPlayerHit(st, dmg);
-      }
+      } else if (inc > 0) R.afterFullBlock(st);
       if (best.r.counter && inc > 0) { e.hp -= 3; if (e.hp <= 0) return res(true); }
     }
     for (const k of ['bleed', 'burn']) if (p[k] > 0) { p[k]--; p.hp -= 2; }

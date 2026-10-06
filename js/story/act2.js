@@ -29,10 +29,10 @@
     script: [
       { act: { n: 2, start: 0, deadline: 99999, label: 'воспоминание', date: '10 ЛЕТ НАЗАД', still: true } },
       // в воспоминании все старые знакомые уже «знакомы» — без досье из настоящего
-      { run: (S) => { ['kir', 'grokh', 'kong', 'bugai', 'shef', 'mk'].forEach((id) => (S.met[id] = true)); } },
+      { run: (S) => { ['kir', 'grokh', 'kong', 'bugai', 'shef', 'mk', 'texas'].forEach((id) => (S.met[id] = true)); } },
       { bg: 'black', trans: 'fade' },
       { chapter: 'ГЛАВА II', title: 'Что было до' },
-      { goto: () => ({ cop: 'a2c_call' }[VN.S.background] || 'a2_soon') },
+      { goto: () => ({ cop: 'a2c_call', boxer: 'a2b_locker' }[VN.S.background] || 'a2_soon') },
     ],
   });
 

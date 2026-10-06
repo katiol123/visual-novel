@@ -53,21 +53,22 @@
       requestAnimationFrame(() => t.classList.add('in'));
       t.addEventListener('click', (e) => e.stopPropagation());
       // Секретные коды на титуле (по физическим клавишам — работают и в русской раскладке):
-      //   test1 — сразу главу II за опера.
+      //   test1 — сразу главу II за опера, test2 — за боксёра.
       let typed = '';
-      const codes = { KeyT: 't', KeyE: 'e', KeyS: 's', Digit1: '1', Numpad1: '1' };
+      const codes = { KeyT: 't', KeyE: 'e', KeyS: 's', Digit1: '1', Numpad1: '1', Digit2: '2', Numpad2: '2' };
       const onCode = (ev) => {
         if (this.node !== t) { window.removeEventListener('keydown', onCode, true); return; }
         typed = (typed + (codes[ev.code] || '·')).slice(-5);
-        if (typed === 'test1') {
+        const testBg = { test1: 'cop', test2: 'boxer' }[typed];
+        if (testBg) {
           window.removeEventListener('keydown', onCode, true);
           this.hide();
           VN.State.reset();
-          const B = VN.Backgrounds.cop;
-          Object.assign(VN.S, { background: 'cop', stats: { ...B.stats }, hp: B.hp, maxHp: B.hp });
-          VN.State.give('badge', 1, true);
+          const B = VN.Backgrounds[testBg];
+          Object.assign(VN.S, { background: testBg, stats: { ...B.stats }, hp: B.hp, maxHp: B.hp });
+          VN.State.give(B.item, 1, true);
           VN.mode.auto = VN.mode.skip = false;
-          VN.Toast.show('<small>ТЕСТ</small><b>Глава II · опер</b>', 'item', VN.Icons.badge);
+          VN.Toast.show(`<small>ТЕСТ</small><b>Глава II · ${B.name}</b>`, 'item', VN.Icons[B.icon]);
           VN.Runner.start('a2_start', 0);
         }
       };
@@ -100,7 +101,7 @@
     run() {
       return new Promise((resolve) => {
         const s = el('div', 'screen creation');
-        s.innerHTML = `<div class="cr-head"><small>ЛИЧНОЕ ДЕЛО · КОРСАК Я.</small><h2>Кем ты был, прежде чем всё пошло к чёрту?</h2></div><div class="cr-cards"></div>`;
+        s.innerHTML = `<div class="cr-head"><small>ЛИЧНОЕ ДЕЛО · КОРСАК Я.</small><h2>Восемь лет ты был опером. Два года назад жетон забрали. Кем ты стал?</h2></div><div class="cr-cards"></div>`;
         const cards = s.querySelector('.cr-cards');
         Object.entries(VN.Backgrounds).forEach(([id, b], i) => {
           const c = el('button', 'cr-card');

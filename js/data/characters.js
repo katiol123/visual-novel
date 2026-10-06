@@ -126,6 +126,17 @@
       sprite: SP + 'povar.png',
       dossier: { no: '2425', role: 'Личный нож Счетовода', quote: 'Режет тоньше бумаги.', threat: 3, stamp: 'БНК', stampColor: '#ff2a4d' },
     },
+    /* ---------- глава II · воспоминание боксёра ---------- */
+    maloy: {
+      name: 'ТИМУР «МАЛОЙ»', short: 'МАЛОЙ', color: '#9be15d', tag: 'спарринг-партнёр',
+      sprite: SP + 'maloy.png',
+      dossier: { no: '2003', role: 'Ринг «Котёл» · спарринг · 20 лет', quote: 'Бьёт честно. Пока.', threat: 1, stamp: 'ДОЛЖНИК', stampColor: '#9be15d' },
+    },
+    lysy: {
+      name: '«ЛЫСЫЙ»', short: 'ЛЫСЫЙ', color: '#c27bff', tag: 'чемпион «Котла»',
+      sprite: SP + 'lysy.png',
+      dossier: { no: '1301', role: 'Ринг «Котёл» · 31 победа · 1 поражение', quote: 'Лысым звали с зоны. Ирокез отрастил назло.', threat: 3, stamp: 'ЧЕМПИОН', stampColor: '#c27bff' },
+    },
     schetovod: {
       name: 'ШЕФ · «СЧЕТОВОД»', short: 'СЧЕТОВОД', color: '#ffb02e', tag: 'глава БНК',
       sprite: SP + 'shef.png',

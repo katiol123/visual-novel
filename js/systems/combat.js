@@ -726,6 +726,7 @@
       } else if (incoming > 0) {
         VN.Audio.sfx('lock');
         await this.banner('ЧИСТЫЙ БЛОК', '', 'acid');
+        await this.applyLog(Rules.afterFullBlock(this.st));
       } else {
         this.say('Промах!');
       }

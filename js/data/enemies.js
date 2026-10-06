@@ -214,6 +214,18 @@
       taunts: ['Иди домой, мент.', 'Это не твоё дело.', 'Тебе скажут — несчастный случай.'],
       hurt: ['Хм.', 'Крепкий.', 'ГРРА!'],
     },
+    /* ---------- глава II · воспоминание боксёра (полтора года назад) ---------- */
+    lysy_fb: {
+      char: 'lysy', threat: 3, name: '«ЛЫСЫЙ» · РЕВАНШ', sprite: SP + 'lysy.png', color: '#c27bff',
+      hp: 74, hidden: 1, armor: 0, passives: [{ id: 'clinch' }],
+      moves: [
+        { name: 'Джеб-джеб', type: 'attack', dice: 2, bonus: 5, w: 3, desc: 'Прощупывает. Два раза.' },
+        { name: 'Апперкот с зоны', type: 'attack', dice: 1, bonus: 9, w: 2, desc: 'Снизу, исподтишка.' },
+        { name: 'Висит на канатах', type: 'guard', dice: 2, bonus: 2, w: 1, desc: 'Тянет время.' },
+      ],
+      taunts: ['Ну что, Корсак, третий раунд скоро.', 'Ляжешь — не больно будет.', 'Я тот бой помню. А ты?'],
+      hurt: ['Ха.', 'Нормально.', 'Хорош…'],
+    },
     schetovod: {
       char: 'schetovod', threat: 5, name: 'ШЕФ · «СЧЕТОВОД»', sprite: SP + 'shef.png', color: '#ffb02e', boss: true,
       hp: 147, hidden: 1, armor: 1, passives: [{ id: 'doubleBook' }, { id: 'audit', every: 3 }],
