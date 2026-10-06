@@ -381,7 +381,7 @@
 
   /** Кто не стал ждать, пока Ян придёт сам. Срабатывает по условиям и по месту — игрок их не видит. */
   const AMB = {
-    council: { at: ['hub', 'flat', 'market', 'police', 'kotel'], ok: (F, t) => F.a3_hunted && t >= 20 },
+    council: { at: ['hub', 'flat', 'market', 'police', 'kotel'], ok: (F, t) => F.a3_hunted && t >= (F._councilNext || 20) },
     sanitar: { at: ['flat', 'hub', 'market'], ok: (F, t) => F.a3_tipped && t >= (F.a3_tippedAt || 0) + 40 },
     shilo: { at: ['hub', 'market'], ok: (F, t) => foe('shilo') && t >= 30 },
     lysy: { at: ['kotel', 'hub'], ok: (F, t) => bg() === 'boxer' && F.fb_ring === 'won' && (t >= 120 || F._ambPlace === 'kotel') },
@@ -461,14 +461,14 @@
           prompt: 'ДВОЕ В ПАЛЬТО',
           choice: [
             { text: 'Нырнуть в толпу с бенгальскими огнями. Раствориться.', check: { stat: 'agi', dc: 9 },
-              pass: [{ n: 'Петарда, визг, чей-то хоровод — и пальто остались позади. {pause=300}Они найдут меня снова. Но не сейчас.' }, { set: { amb3_council: false, a3_hunted: true } }, { run: (S) => { S.flags._councilDodged = (S.flags._councilDodged || 0) + 1; if (S.flags._councilDodged >= 2) S.flags.amb3_council = true; } }, { hide: 'likvidator' }, { time: 10 }, backHub],
+              pass: [{ n: 'Петарда, визг, чей-то хоровод — и пальто остались позади. {pause=300}Они найдут меня снова. Но не сейчас.' }, { run: (S) => { S.flags._councilDodged = (S.flags._councilDodged || 0) + 1; if (S.flags._councilDodged < 2) { S.flags.amb3_council = false; S.flags._councilNext = S.time + 70; } } }, { hide: 'likvidator' }, { time: 10 }, backHub],
               fail: [{ n: 'Хоровод расступился сам — люди чувствуют, когда рядом работают. {pause=300}Я остался один на пустом пятачке.' }, { jump: 'cfight' }] },
             { text: 'Встретить их. Хватит бегать.', do: [{ jump: 'cfight' }] },
           ],
         },
         { label: 'cfight' },
         {
-          combat: 'likvidator', opts: (S) => ({ mods: VN.act3Mods(S, S.flags.haveScanner ? [] : ['ambushed']) }),
+          combat: 'likvidator', opts: (S) => ({ mods: VN.act3Mods(S, S.flags._councilDodged ? ['ambushed'] : []) }),
           win: [
             { n: 'Первый лежал на снегу. Второй ушёл — не побежал, ушёл, как уходят со смены.' },
             { n: 'В кармане у первого — листок. Не «С.» с хвостиком. Ровный, медицинский почерк: {i}«Старшего — аккуратно. Младшего не трогать. Н.»{/i}' },

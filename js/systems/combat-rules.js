@@ -149,6 +149,7 @@
       const steam = P(def, 'steam');
       if (steam && st.round <= steam.rounds && m.dice) { nHidden = vals.length; if (st.round === 1) log.push({ t: 'ПАР', sub: `${steam.rounds} раунда кубы не видно`, kind: 'bad' }); }
       if (st.reveal) nHidden = 0;
+      if (tr && attacking && st.round === tr.round) nHidden = 0; // удвоенный удар виден целиком — честное предупреждение
       const hiddenSum = sumOf(vals.slice(0, nHidden));
       const intent = { move: m, vals, value, bonus, pair: vals.length >= 2 && new Set(vals).size < vals.length, nHidden, hiddenSum, revealed: nHidden === 0 };
       // двойная бухгалтерия: второй вариант урона
