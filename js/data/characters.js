@@ -1,6 +1,6 @@
 /* ==========================================================================
    Действующие лица. Ключ объекта = короткое имя в сценарии:
-   { kir: 'реплика' } — говорит Кир.
+   { kir: 'реплика' } — говорит Кит.
    dossier — карточка «дела», которая всплывает при первой встрече.
    ========================================================================== */
 (function () {
@@ -10,14 +10,14 @@
   window.VN.Characters = {
     n: { name: null, style: 'narrator' },
 
-    yan: { name: 'ЯН КОРСАК', short: 'ЯН', color: '#e8e2d0', tag: 'это ты', style: 'self' },
+    yan: { name: 'ДЭН КОРВИН', short: 'ДЭН', color: '#e8e2d0', tag: 'это ты', style: 'self' },
 
-    mika: { name: 'МИКА', color: '#7fd6ff', tag: 'голос в трубке', style: 'phone' },
-    mk: { name: 'МИКА', color: '#7fd6ff', tag: 'младший брат', sprite: SP + 'mika.png' },
+    mika: { name: 'НИКИ', color: '#7fd6ff', tag: 'голос в трубке', style: 'phone' },
+    mk: { name: 'НИКИ', color: '#7fd6ff', tag: 'младший брат', sprite: SP + 'mika.png' },
     radio: { name: 'РАЦИЯ · КАНАЛ 9', color: '#c9d4c2', tag: 'капитан Грох', style: 'phone' },
 
     kir: {
-      name: 'КИР ВОЛЬСКИЙ', short: 'КИР', color: '#b6ff3b', tag: 'бывший напарник',
+      name: 'КИТ УОЛШ', short: 'КИТ', color: '#b6ff3b', tag: 'бывший напарник',
       sprite: SP + 'kir.png',
       dossier: {
         no: '0412', role: 'Частный сыск · экс-опер Участка 13',
@@ -57,7 +57,7 @@
     },
 
     texas: {
-      name: 'СЁМА «ТЕХАС»', short: 'ТЕХАС', color: '#9be15d', tag: 'контрабандист',
+      name: 'СЭМ «ТЕХАС»', short: 'ТЕХАС', color: '#9be15d', tag: 'контрабандист',
       sprite: SP + 'texas.png',
       dossier: {
         no: '0777', role: 'Контрабанда · скупка · слухи',
@@ -77,7 +77,7 @@
     },
 
     bugai: {
-      name: 'ТАРАС «БУГАЙ»', short: 'БУГАЙ', color: '#c27bff', tag: 'правая рука БНК',
+      name: 'ТЕРРИ «БУГАЙ»', short: 'БУГАЙ', color: '#c27bff', tag: 'правая рука БНК',
       sprite: SP + 'bugai.png',
       dossier: {
         no: '0001', role: 'Силовое крыло БНК · 3 судимости, 0 сроков',
@@ -102,7 +102,7 @@
       dossier: { no: '7171', role: 'Карманные кражи · 14 приводов', quote: 'Что упало — то её. Что не упало — тоже.', threat: 1, stamp: 'ЛИПКИЕ ПАЛЬЦЫ', stampColor: '#ff7ad9' },
     },
     valya: {
-      name: 'ТЁТЯ ВАЛЯ', short: 'ВАЛЯ', color: '#ffd28a', tag: 'барахолка',
+      name: 'ТЁТЯ ВЭЛ', short: 'ВЭЛ', color: '#ffd28a', tag: 'барахолка',
       sprite: SP + 'valya.png',
       dossier: { no: '1950', role: 'Торговля с рук · 40 лет стажа', quote: 'Продаст ёлку в июле.', threat: 1, stamp: 'ТОРГУЕТ', stampColor: '#ffd28a' },
     },
@@ -128,7 +128,7 @@
     },
     /* ---------- глава II · воспоминание боксёра ---------- */
     maloy: {
-      name: 'ТИМУР «МАЛОЙ»', short: 'МАЛОЙ', color: '#9be15d', tag: 'спарринг-партнёр',
+      name: 'ТИМ «МАЛОЙ»', short: 'МАЛОЙ', color: '#9be15d', tag: 'спарринг-партнёр',
       sprite: SP + 'maloy.png',
       dossier: { no: '2003', role: 'Ринг «Котёл» · спарринг · 20 лет', quote: 'Бьёт честно. Пока.', threat: 1, stamp: 'ДОЛЖНИК', stampColor: '#9be15d' },
     },
@@ -146,7 +146,7 @@
     /* ---------- глава III · старый Новый год ---------- */
     mama: { name: 'МАМА', color: '#f2c6d0', tag: 'голос в трубке', style: 'phone' },
     nina: {
-      name: 'НИНА ВЕРШИНИНА', short: 'НИНА', color: '#f2c6d0', tag: 'старшая медсестра',
+      name: 'НОРА ВЕЙЛ', short: 'НОРА', color: '#f2c6d0', tag: 'старшая медсестра',
       sprite: SP + 'nina.png',
       dossier: { no: '1402', role: 'Больница №2 · старшая медсестра · 31 год стажа', quote: 'Мать. Вдова. «Наверху».', threat: 5, stamp: 'НВ', stampColor: '#f2c6d0' },
     },

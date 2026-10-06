@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Кейс + досье Яна. Два режима:
+   Кейс + досье Дэна. Два режима:
      open()             — просмотр, применение лечилок вне боя
      select(filter, …)  — выбор предмета (обмен, взятка, предмет в бою)
    ========================================================================== */
@@ -28,7 +28,7 @@
       const left = el('div', 'inv-dossier');
       left.innerHTML = `
         <div class="inv-tag">ЛИЧНОЕ ДЕЛО</div>
-        <div class="inv-name">ЯН КОРСАК</div>
+        <div class="inv-name">ДЭН КОРВИН</div>
         <div class="inv-bg">${bg ? bg.name : '—'}</div>
         <div class="inv-stats">${Object.entries(VN.State.STATS).map(([k, s]) => `
           <div class="inv-stat" style="--c:${s.color}"><span>${s.name}</span><b>${'<i></i>'.repeat(S.stats[k])}${'<i class="off"></i>'.repeat(Math.max(0, 3 - S.stats[k]))}</b><em>+${S.stats[k]}</em></div>`).join('')}

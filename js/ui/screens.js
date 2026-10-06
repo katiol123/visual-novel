@@ -123,7 +123,7 @@
     run() {
       return new Promise((resolve) => {
         const s = el('div', 'screen creation');
-        s.innerHTML = `<div class="cr-head"><small>ЛИЧНОЕ ДЕЛО · КОРСАК Я.</small><h2>Восемь лет ты был опером. Два года назад жетон забрали. Кем ты стал?</h2></div><div class="cr-cards"></div>`;
+        s.innerHTML = `<div class="cr-head"><small>ЛИЧНОЕ ДЕЛО · КОРВИН Я.</small><h2>Восемь лет ты был опером. Два года назад жетон забрали. Кем ты стал?</h2></div><div class="cr-cards"></div>`;
         const cards = s.querySelector('.cr-cards');
         Object.entries(VN.Backgrounds).forEach(([id, b], i) => {
           const c = el('button', 'cr-card');
@@ -270,7 +270,7 @@
             <div><b>${clues}/${actClues.length}</b><span>улик</span></div>
             <div><b>${gotEnds}/${actEnds.length}</b><span>концовок ${act === 4 ? 'истории' : act ? 'главы' : 'пролога'}</span></div>
           </div>
-          <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act === 4 ? 'Сальдо подведено. Так закончилась история Яна Корсака — из всех, что могли случиться, эта' : 'Этот путь обрывается здесь'}</div>
+          <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act === 4 ? 'Сальдо подведено. Так закончилась история Дэна Корвина — из всех, что могли случиться, эта' : 'Этот путь обрывается здесь'}</div>
           <div class="en-btns">${e.next ? `<button class="btn btn-acid" data-a="next">${NEXT[e.next] || 'ДАЛЬШЕ'} →</button>` : ''}<button class="btn ${e.next ? 'btn-ghost' : 'btn-acid'}" data-a="new">НОВОЕ ДЕЛО</button><button class="btn btn-ghost" data-a="board">ДОСКА УЛИК</button><button class="btn btn-ghost" data-a="menu">ГЛАВНОЕ МЕНЮ</button></div>`;
         s.addEventListener('click', (ev) => ev.stopPropagation());
         s.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', (ev) => {

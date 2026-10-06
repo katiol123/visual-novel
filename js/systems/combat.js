@@ -72,7 +72,7 @@
           <div class="it-desc"></div>
         </div>
         <div class="cb-ppanel">
-          <div class="cb-pname">ЯН КОРСАК <small>${(VN.Backgrounds[VN.S.background] || {}).name || ''}</small></div>
+          <div class="cb-pname">ДЭН КОРВИН <small>${(VN.Backgrounds[VN.S.background] || {}).name || ''}</small></div>
           <div class="cb-bar player"><i class="lag"></i><i class="fill"></i><span></span></div>
           <div class="cb-res"></div>
           <div class="cb-mods">${this.mods.map((m) => `<span class="${m.kind}" title="${m.desc}">${m.name}</span>`).join('')}</div>
@@ -139,7 +139,7 @@
         <div class="ci-word" data-t="СХВАТКА">СХВАТКА</div>
         <div class="ci-card ci-left">
           <div class="ci-tag">ФИГУРАНТ №1 · ${bg.name || ''}</div>
-          <div class="ci-name">ЯН<br>КОРСАК</div>
+          <div class="ci-name">ДЭН<br>КОРВИН</div>
           ${row('ЗДОРОВЬЕ', `${this.player.hp}/${this.player.maxHp}`)}${bar(this.player.hp, this.player.maxHp)}
           ${row('КУБЫ', cs.dice + (this.st.dice1 ? ` <small>(${this.st.dice1 > 0 ? '+' : ''}${this.st.dice1} в 1-м раунде)</small>` : ''))}${row('ПЕРЕБРОСЫ', cs.rerolls)}${row('УДАР', sgn(cs.atkBonus))}${row('БЛОК', sgn(cs.blkBonus))}
         </div>

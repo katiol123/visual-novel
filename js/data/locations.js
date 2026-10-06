@@ -14,9 +14,9 @@
   VN.Locations = {
     black: { name: '', music: 'score', paint(c) { c.fillStyle = '#000'; c.fillRect(0, 0, W, H); } },
 
-    /* ------------------------------------------------ квартира Яна */
+    /* ------------------------------------------------ квартира Дэна */
     apartment: {
-      name: 'Квартира Корсака', ambient: 'rain', seed: 11,
+      name: 'Квартира Корвина', ambient: 'rain', seed: 11,
       weather: 'rain', weatherClip: [1060, 120, 700, 600],
       paint(c, r, P) {
         P.vgrad(c, 0, 0, W, H, [[0, '#0e1411'], [0.7, '#090d0b'], [1, '#040605']]);
