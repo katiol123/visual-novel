@@ -66,9 +66,9 @@
       const found = own.filter((k) => S.flags[k]);
       const carried = VN.cluesFor(act).filter((k) => (VN.Clues[k].act || 0) < act && S.flags[k]);
       side.innerHTML = `
-        <h3>УЛИКИ${act ? ' · ГЛАВА I' : ''} <small>${found.length}/${own.length}</small></h3>
+        <h3>УЛИКИ${['', ' · ГЛАВА I', ' · ВОСПОМИНАНИЕ', ' · ГЛАВА III'][act] || ''} <small>${found.length}/${own.length}</small></h3>
         <div class="notes">${found.length ? found.map(note).join('') : '<p class="muted">Пока пусто. Задавай вопросы.</p>'}</div>
-        ${carried.length ? `<h3>ИЗ ПРОЛОГА <small>ещё сработают</small></h3><div class="notes">${carried.map(note).join('')}</div>` : ''}
+        ${carried.length ? `<h3>${act === 1 ? 'ИЗ ПРОЛОГА' : 'ИЗ ПРОШЛОГО'} <small>ещё сработают</small></h3><div class="notes">${carried.map(note).join('')}</div>` : ''}
         ${(() => {
           const met = Object.keys(S.met).filter((id) => VN.Characters[id]);
           if (!met.length || !act) return '';
