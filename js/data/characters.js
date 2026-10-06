@@ -143,6 +143,18 @@
       sprite: SP + 'valet.png',
       dossier: { no: '0052', role: 'Карманные кражи · ни одной судимости', quote: 'Карман — это доверие, которое человек забыл при себе.', threat: 2, stamp: 'НЕ ПОЙМАН', stampColor: '#c27bff' },
     },
+    /* ---------- глава III · старый Новый год ---------- */
+    mama: { name: 'МАМА', color: '#f2c6d0', tag: 'голос в трубке', style: 'phone' },
+    nina: {
+      name: 'НИНА ВЕРШИНИНА', short: 'НИНА', color: '#f2c6d0', tag: 'старшая медсестра',
+      sprite: SP + 'valya.png', placeholder: true, // заглушка — ждём спрайт
+      dossier: { no: '1402', role: 'Больница №2 · старшая медсестра · 31 год стажа', quote: 'Мать. Вдова. «Наверху».', threat: 5, stamp: 'НВ', stampColor: '#f2c6d0' },
+    },
+    likvidator: {
+      name: 'ЛИКВИДАТОР', short: 'ЛИКВИДАТОР', color: '#ff7a3d', tag: 'Совет БНК',
+      sprite: SP + 'povar.png', placeholder: true, // заглушка — ждём спрайт
+      dossier: { no: '0113', role: 'Исполнитель решений Совета', quote: 'Срок — до старого Нового года.', threat: 3, stamp: 'СПИСАТЬ', stampColor: '#ff2a4d' },
+    },
     schetovod: {
       name: 'ШЕФ · «СЧЕТОВОД»', short: 'СЧЕТОВОД', color: '#ffb02e', tag: 'глава БНК',
       sprite: SP + 'shef.png',

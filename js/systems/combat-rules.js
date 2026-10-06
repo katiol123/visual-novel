@@ -22,6 +22,8 @@
      getaway     — рвётся к выходу: каждая его «защита» — шаг; на steps-м шаге уходит
      sway        — качка (трамвай): в нечётных раундах твой БЛОК −blk
      clinch      — грязный клинч: если ты погасил его удар целиком, он виснет на тебе — −1 куб в следующем раунде
+     sedate      — наркоз: каждый every-й раунд у тебя на dice кубов меньше (игла достала)
+     lastWord    — «последнее слово»: при ≤ at·ХП один раз закрывается — следующий ход всегда moves[move]
 
    МОДИФИКАТОРЫ БОЯ (VN.CombatMods, передаются сюжетом через opts.mods):
      баффы союзников и дебаффы-обстоятельства: hp, dice, dice1, rerolls,
@@ -67,7 +69,7 @@
     /** Время боя: сколько игровых минут стоит один раунд в каждом акте
         (дробное значение копится: 0.5 — минута за каждые 2 раунда).
         В прологе до полуночи меньше часа — затянутый бой может провалить всё. */
-    MINUTES_PER_ROUND: { 0: 1.25, 1: 1.25 }, // пролог подобран ботом: ~1 забег из 5 опаздывает из-за боёв
+    MINUTES_PER_ROUND: { 0: 1.25, 1: 1.25, 3: 1.25 }, // пролог подобран ботом: ~1 забег из 5 опаздывает из-за боёв
     minutesPerRound(act) { return Rules.MINUTES_PER_ROUND[act || 0] || 0; },
     /** Сколько минут набежало за rounds сыгранных раундов. */
     fightMinutes(rounds, act) { return Math.floor(rounds * Rules.minutesPerRound(act) + 1e-9); },
@@ -119,6 +121,10 @@
         if (rock) log.push({ t: 'КАЧКА', sub: `трамвай кренится: БЛОК −${sw.blk} в этом раунде`, kind: 'bad' });
       }
       e.guard = 0;
+      const sd = P(def, 'sedate');
+      if (sd && st.round % sd.every === 0) log.push({ t: 'НАРКОЗ', sub: `игла достала: −${sd.dice} куба в этом раунде`, kind: 'bad' });
+      const lw = P(def, 'lastWord');
+      if (lw && e.lastWordDue) { e.lastWordDue = false; e.next = lw.move; log.push({ t: lw.name || 'ПОСЛЕДНЕЕ СЛОВО', sub: 'он закрылся — этот раунд он только защищается', kind: 'bad' }); }
       const m = Rules.pickMove(st);
       const attacking = m.type === 'attack' || m.type === 'barrage';
       const vals = []; for (let i = 0; i < (m.dice || 0); i++) vals.push(d6());
@@ -155,8 +161,10 @@
 
     /** Поправка к числу твоих кубов в этом раунде (холод и т. п.). */
     diceMod(st) {
-      const c = P(st.def, 'cold');
-      return c && st.round >= c.from ? -1 : 0;
+      const c = P(st.def, 'cold'), sd = P(st.def, 'sedate');
+      let m = c && st.round >= c.from ? -1 : 0;
+      if (sd && st.round % sd.every === 0) m -= sd.dice;
+      return m;
     },
 
     /** После броска игрока: может украсть куб. Возвращает индекс украденного или -1. */
@@ -184,6 +192,8 @@
       if (th && kind === 'atk' && dmg > 0) { st.player.hp -= th.dmg; log.push({ t: 'ШИПЫ', sub: `−${th.dmg} тебе`, kind: 'bad', toPlayer: th.dmg }); }
       const bo = P(st.def, 'bolt');
       if (bo && e.hp > 0 && e.hp <= e.maxHp * bo.at && !e.fled) { e.fled = true; log.push({ t: 'СБЕЖАЛ', sub: 'бросил всё и рванул прочь', kind: 'gold' }); }
+      const lw = P(st.def, 'lastWord');
+      if (lw && !e.lastWordUsed && e.hp > 0 && e.hp <= e.maxHp * lw.at) { e.lastWordUsed = true; e.lastWordDue = true; }
       const sw = P(st.def, 'secondWind');
       if (sw && !e.winded && e.hp > 0 && e.hp <= e.maxHp * sw.at) {
         e.winded = true; e.hp = Math.min(e.maxHp, e.hp + sw.heal);
@@ -244,6 +254,8 @@
         bolt: (p) => ['НЕ БОЕЦ', `при ${Math.round(p.at * 100)}% здоровья сбежит`],
         sway: (p) => ['КАЧКА', `в нечётных раундах трамвай кренится: твой БЛОК −${p.blk}`],
         clinch: () => ['ГРЯЗНЫЙ КЛИНЧ', 'погасишь удар целиком — повиснет на тебе: −1 куб в следующем раунде'],
+        sedate: (p) => ['НАРКОЗ', `каждый ${p.every}-й раунд у тебя −${p.dice} куба`],
+        lastWord: (p) => [p.name || 'ПОСЛЕДНЕЕ СЛОВО', `при ≤${Math.round(p.at * 100)}% здоровья один раз уходит в глухую защиту`],
         getaway: (p) => ['К ОКНУ', `каждая его защита — шаг к выходу; ${p.steps}-й шаг — и он ушёл`],
       };
       return (def.passives || []).map((p) => { const f = T[p.id]; const [t, d] = f ? f(p) : [p.id, '']; return { t, d }; });

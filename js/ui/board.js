@@ -77,7 +77,7 @@
             return `<div class="rel ${f ? 'f' : x ? 'x' : ''}" style="--c:${ch.color}"><b>${ch.short || ch.name}</b><span>${f ? 'друг' : x ? 'враг' : '?'}</span></div>`;
           }).join('')}</div>`;
         })()}
-        <h3>КОНЦОВКИ ${act ? 'ГЛАВЫ I' : 'ПРОЛОГА'}</h3>
+        <h3>КОНЦОВКИ ${['ПРОЛОГА', 'ГЛАВЫ I', 'ВОСПОМИНАНИЯ', 'ГЛАВЫ III'][act] || ''}</h3>
         <div class="ends">${Object.entries(VN.Endings).filter(([, e]) => (e.act || 0) === act).map(([id, e]) => {
           const got = VN.Meta.data.endings[id];
           return `<div class="end ${got ? 'got' : ''}" style="--c:${e.color}"><b>${got ? e.title : '? ? ?'}</b><span>${got ? e.sub : 'не открыта'}</span></div>`;

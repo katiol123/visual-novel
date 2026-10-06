@@ -6,7 +6,7 @@ const ctx = { console, localStorage: { getItem: () => null, setItem() {} }, setT
 ctx.window = ctx; vm.createContext(ctx);
 const files = ['core/namespace.js', 'core/state.js', 'data/characters.js', 'data/items.js', 'data/enemies.js', 'data/codex.js', 'data/combat-mods.js', 'data/merchants.js',
   'render/backdrop.js', 'data/locations.js', 'data/locations-act1.js', 'systems/combat-rules.js', 'engine/story.js',
-  'story/prologue.js', 'story/endings.js', 'story/act1.js', 'story/act1-mid.js', 'story/act1-mid2.js', 'story/act1-end.js', 'story/act2.js', 'story/act2-cop.js', 'story/act2-boxer.js', 'story/act2-thief.js'];
+  'story/prologue.js', 'story/endings.js', 'story/act1.js', 'story/act1-mid.js', 'story/act1-mid2.js', 'story/act1-end.js', 'story/act2.js', 'story/act2-cop.js', 'story/act2-boxer.js', 'story/act2-thief.js', 'story/act3.js', 'story/act3-mid.js', 'story/act3-end.js'];
 for (const f of files) vm.runInContext(fs.readFileSync(G + f, 'utf8'), ctx, { filename: f });
 const VN = ctx.VN, errs = [];
 const scenes = VN.Story.all();
@@ -35,11 +35,11 @@ for (const id of Object.keys(scenes)) {
   });
   if (sc.loc) chk(VN.Locations[sc.loc], `${id}: loc «${sc.loc}»`);
 }
-for (const [id, e] of Object.entries(VN.Enemies)) (e.passives || []).forEach((p) => chk(['steal', 'poison', 'reinforce', 'steam', 'reads', 'enrage', 'secondWind', 'doubleBook', 'longRange', 'thorns', 'drunk', 'cleaver', 'audit', 'cold', 'bolt', 'getaway', 'clinch', 'sway'].includes(p.id), `враг ${id}: пассивка ${p.id}`));
+for (const [id, e] of Object.entries(VN.Enemies)) (e.passives || []).forEach((p) => chk(['steal', 'poison', 'reinforce', 'steam', 'reads', 'enrage', 'secondWind', 'doubleBook', 'longRange', 'thorns', 'drunk', 'cleaver', 'audit', 'cold', 'bolt', 'getaway', 'clinch', 'sway', 'sedate', 'lastWord'].includes(p.id), `враг ${id}: пассивка ${p.id}`));
 const ends = Object.keys(VN.Endings), used = new Set();
 for (const id of Object.keys(scenes)) VN.Story.get(id).compiled.forEach((c) => c.ending && used.add(c.ending));
 ends.forEach((e) => chk(used.has(e), `концовка «${e}» нигде не вызывается`));
 const blocks = (a) => new Set(VN.Story.blocks(a).map((s) => s.block)).size;
-console.log(`Сцен: ${Object.keys(scenes).length} · блоков пролога: ${blocks(0)} · главы I: ${blocks(1)} · главы II: ${blocks(2)} · концовок: ${ends.length}`);
+console.log(`Сцен: ${Object.keys(scenes).length} · блоков пролога: ${blocks(0)} · главы I: ${blocks(1)} · главы II: ${blocks(2)} · главы III: ${blocks(3)} · концовок: ${ends.length}`);
 console.log(errs.length ? 'ОШИБКИ:\n' + errs.join('\n') : 'Ошибок нет.');
 process.exit(errs.length ? 1 : 0);

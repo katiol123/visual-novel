@@ -238,6 +238,63 @@
       taunts: ['Я тебя этому не учил.', 'Руки помнят, Ян. А голова?', 'Заказ есть заказ, ученик.'],
       hurt: ['Неплохо.', 'Ученик…', 'Ай-яй.'],
     },
+    /* ---------- глава III · старый Новый год ---------- */
+    likvidator: {
+      char: 'likvidator', threat: 3, name: 'ЛИКВИДАТОР СОВЕТА', sprite: SP + 'povar.png' /* заглушка — ждём спрайт */, color: '#ff7a3d',
+      hp: 120, hidden: 1, armor: 1, passives: [{ id: 'reinforce', every: 3, dmg: 4, name: 'ВТОРОЙ СТВОЛ' }],
+      moves: [
+        { name: 'Глушитель', type: 'attack', dice: 2, bonus: 0, w: 3, desc: 'Тихо. Как подпись под протоколом.' },
+        { name: 'Удавка', type: 'attack', dice: 1, bonus: 2, w: 2, onHit: 'cuff', desc: 'Попадание → −1 куб.' },
+        { name: 'За угол', type: 'guard', dice: 2, bonus: 2, w: 1, desc: 'Прячется за углом.' },
+      ],
+      taunts: ['Срок — до старого Нового года.', 'Ничего личного. Бухгалтерия.', 'Совет решил.'],
+      hurt: ['Тц.', 'Живучий…', 'Второй, работай!'],
+    },
+    lysy_a3: {
+      char: 'lysy', threat: 2, name: '«ЛЫСЫЙ» · ДОЛГ ЗА РИНГ', sprite: SP + 'lysy.png', color: '#c27bff',
+      hp: 70, hidden: 1, armor: 0, passives: [{ id: 'clinch' }, { id: 'enrage', at: 0.5, atk: 2 }],
+      moves: [
+        { name: 'Джеб-джеб', type: 'attack', dice: 2, bonus: 4, w: 3, desc: 'Как полтора года назад.' },
+        { name: 'Апперкот из-за угла', type: 'attack', dice: 1, bonus: 8, w: 2, desc: 'Не на ринге — правил нет.' },
+        { name: 'В клинч', type: 'guard', dice: 2, bonus: 1, w: 1, desc: 'Виснет и тянет время.' },
+      ],
+      taunts: ['Должок, Корсак.', 'Ты мне карьеру сломал.', 'Без канатов поговорим.'],
+      hurt: ['Тц!', 'Сука…', 'Как тогда…'],
+    },
+    grokh_a3: {
+      char: 'grokh', threat: 4, name: 'ГРОХОТОВ · ПОСЛЕДНИЙ ПРИКАЗ', sprite: SP + 'grokh.png', color: '#c9d4c2',
+      hp: 97, hidden: 1, armor: 1, passives: [{ id: 'reinforce', every: 3, dmg: 5, name: 'ОМОН' }, { id: 'enrage', at: 0.4, atk: 2 }],
+      moves: [
+        { name: 'Дубинка', type: 'attack', dice: 2, bonus: 2, w: 3, desc: 'Резиновое правосудие.' },
+        { name: 'Наручники', type: 'attack', dice: 1, bonus: 2, w: 2, onHit: 'cuff', desc: 'Попадание → −1 куб.' },
+        { name: 'По уставу', type: 'guard', dice: 2, bonus: 2, w: 1, desc: 'Блокирует удар.' },
+      ],
+      taunts: ['Я тебя десять лет на поводке держал.', 'По-человечески, Корсак.', 'Статья найдётся.'],
+      hurt: ['Шрам помнишь?', 'Сержант!', 'Ах ты…'],
+    },
+    sanitar_a3: {
+      char: 'sanitar', threat: 4, name: 'СТАРШИЙ САНИТАР', sprite: SP + 'sanitar.png', color: '#d8e0dc', boss: true,
+      hp: 96, hidden: 1, armor: 1, passives: [{ id: 'poison', stack: 1 }, { id: 'sedate', every: 3, dice: 2 }],
+      moves: [
+        { name: 'Шприц', type: 'attack', dice: 1, bonus: 0, w: 3, desc: 'Попадание — стак яда.' },
+        { name: 'Скальпель', type: 'attack', dice: 2, bonus: -1, w: 2, desc: 'Аккуратно. По-больничному.' },
+        { name: 'Каталка', type: 'guard', dice: 2, bonus: 2, w: 1, desc: 'Прячется за каталкой.' },
+      ],
+      taunts: ['Нина Викторовна просила аккуратно.', 'Режим, больной. Отбой.', 'Сейчас будет холодно.'],
+      hurt: ['Тьфу.', 'Неаккуратно.', 'Не по протоколу…'],
+    },
+    bugai_a3: {
+      char: 'bugai', threat: 5, name: 'БУГАЙ · «КАПЮШОН»', sprite: SP + 'bugai.png', color: '#c27bff', boss: true,
+      hp: 72, hidden: 1, armor: 2, passives: [{ id: 'clinch' }, { id: 'lastWord', at: 0.35, move: 3, name: 'КАПЮШОН' }],
+      moves: [
+        { name: 'Кулак', type: 'attack', dice: 2, bonus: 8, w: 3, desc: 'Как отбойный молоток.' },
+        { name: 'Опускает голову…', type: 'charge', w: 1, next: 2, desc: 'Следующий ход — ТАРАН.' },
+        { name: 'ТАРАН', type: 'attack', dice: 3, bonus: 10, w: 0, desc: 'Рога. Вся масса.' },
+        { name: 'Капюшон на глаза', type: 'guard', dice: 3, bonus: 4, w: 1, desc: 'Как тогда у камеры. Глухая защита.' },
+      ],
+      taunts: ['Двадцать лет я носил этот капюшон.', 'Она сказала — аккуратно.', 'Сорок седьмой, Корсак. Помнишь след?'],
+      hurt: ['Ммм.', 'Как Антон бьёшь…', 'Рано.'],
+    },
     schetovod: {
       char: 'schetovod', threat: 5, name: 'ШЕФ · «СЧЕТОВОД»', sprite: SP + 'shef.png', color: '#ffb02e', boss: true,
       hp: 147, hidden: 1, armor: 1, passives: [{ id: 'doubleBook' }, { id: 'audit', every: 3 }],
