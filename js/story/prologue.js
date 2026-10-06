@@ -414,6 +414,7 @@
             text: '«Ты ставил на мои бои, Шило. Помнишь, чем кончил Лысый?»', need: 'knuckles',
             check: { stat: 'str', dc: 7 },
             pass: [
+              { set: { shiloLysy: true } },
               { shilo: '…Корвин? {pause=300}Тот самый Корвин? С Канальной?' }, { set: { shiloRespect: true } },
               { shilo: 'Фью-ю… Проходи. Я ничего не видел. И… {whisper}Техас сегодня нервный. Ему кто-то заплатил, чтобы он врал.{/whisper}' },
               { set: { texasLies: true } },
@@ -421,6 +422,7 @@
               { goto: 'docks' },
             ],
             fail: [
+              { set: { shiloLysy: true } },
               { shilo: 'Лысый был лысый. А я — {red}Шило{/red}. {pause=200}Вжик!' },
               { jump: 'fight' },
             ],
