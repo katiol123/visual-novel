@@ -143,7 +143,7 @@
       sprite: SP + 'valet.png',
       dossier: { no: '0052', role: 'Карманные кражи · ни одной судимости', quote: 'Карман — это доверие, которое человек забыл при себе.', threat: 2, stamp: 'НЕ ПОЙМАН', stampColor: '#c27bff' },
     },
-    /* ---------- глава III · старый Новый год ---------- */
+    /* ---------- глава III · Ночь Маяка ---------- */
     mama: { name: 'МАМА', color: '#f2c6d0', tag: 'голос в трубке', style: 'phone' },
     nina: {
       name: 'НОРА ВЕЙЛ', short: 'НОРА', color: '#f2c6d0', tag: 'старшая медсестра',
@@ -153,7 +153,7 @@
     likvidator: {
       name: 'ЛИКВИДАТОР', short: 'ЛИКВИДАТОР', color: '#ff7a3d', tag: 'Совет БНК',
       sprite: SP + 'likvidator.png',
-      dossier: { no: '0113', role: 'Исполнитель решений Совета', quote: 'Срок — до старого Нового года.', threat: 3, stamp: 'СПИСАТЬ', stampColor: '#ff2a4d' },
+      dossier: { no: '0113', role: 'Исполнитель решений Совета', quote: 'Срок — до Ночи Маяка.', threat: 3, stamp: 'СПИСАТЬ', stampColor: '#ff2a4d' },
     },
     schetovod: {
       name: 'ШЕФ · «СЧЕТОВОД»', short: 'СЧЕТОВОД', color: '#ffb02e', tag: 'глава БНК',

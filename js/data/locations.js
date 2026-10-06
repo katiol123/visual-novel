@@ -173,7 +173,7 @@
         c.fillStyle = '#2e3a33'; c.fillRect(0, 596, W, 8);
         P.vgrad(c, 0, 860, W, 220, [[0, '#0d100f'], [1, '#030404']]);
         P.grime(c, r, 26, 'rgba(0,0,0,0.3)');
-        // обезьянник
+        // клетка для задержанных
         c.fillStyle = '#050706'; c.fillRect(40, 160, 500, 700);
         c.fillStyle = '#3a423d';
         for (let x = 60; x < 540; x += 38) c.fillRect(x, 160, 9, 700);
