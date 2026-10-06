@@ -105,12 +105,11 @@
         if (k === name) return;
         const a = this.amb[k];
         a.gain.gain.setTargetAtTime(0, now, 0.6);
+        a.nodes.dead = true;
         setTimeout(() => a.nodes.forEach((n) => { try { n.stop(); } catch (e) {} }), 3000);
         delete this.amb[k];
       });
-      if (name !== 'rain') this._rain(false);
       if (!name || name === 'none' || this.amb[name]) return;
-      if (name === 'rain') { this._rain(true); this.amb.rain = { gain: { gain: { setTargetAtTime() {} } }, nodes: [] }; return; }
       const gain = c.createGain(); gain.gain.value = 0; gain.connect(this.ambBus);
       const nodes = [];
       const noiseLayer = (type, freq, q, g) => {
@@ -127,6 +126,7 @@
           o.connect(f); f.connect(gg); gg.connect(gain); o.start(); nodes.push(o);
         });
       };
+      if (name === 'rain') this._rainLoop(gain, nodes); // файл игрока, бесшовная петля
       if (name === 'room') { noiseLayer('lowpass', 500, 0.4, 0.05); drone(55, 0.04); }
       if (name === 'wind') { noiseLayer('bandpass', 400, 0.8, 0.18); drone(36.7, 0.05); }
       if (name === 'hum') { drone(49, 0.05); noiseLayer('bandpass', 120, 2, 0.06); }
@@ -141,22 +141,49 @@
     TRACKS: {
       score: { src: 'assets/music/echoes-of-the-abyss.mp3', vol: 0.42 },
       fight: { src: 'assets/music/steel-tangerines.mp3', vol: 0.6 },
-      rain: { src: 'assets/music/rain.mp3', vol: 0.55, duckable: true }, // эмбиент дождя (файл игрока)
     },
     /** Громкость, к которой должен прийти трек сейчас: его база × ползунок × приглушение в бою. */
     _goal(t) { return t.target * this.vol * (t.duckable ? this.duck : 1); },
-    /** Дождь из файла: включить/выключить с плавным переходом. Независим от музыки сцены. */
-    _rain(on) {
-      const t = this._el('rain');
-      t.on = on;
-      if (on) {
-        t.a.muted = this.muted;
-        const p = t.a.play();
-        if (p && p.catch) p.catch(() => { this.pendingRain = true; });
-        this._fade('rain', this._goal(t), 1500);
-      } else if (!t.a.paused) {
-        this._fade('rain', 0, 1500, () => { if (!this.amb.rain) t.a.pause(); });
+    /** Дождь — файл игрока (assets/music/rain.mp3, в base64 из js/data/rain-audio.js).
+        HTMLAudio зацикливает mp3 с микропаузой, поэтому: декодируем один раз, срезаем тишину
+        по краям и склеиваем конец с началом кроссфейдом — петля без единого шва.
+        Идёт через шину эмбиента: громкость, «без звука» и приглушение в бою — как у всего. */
+    RAIN_GAIN: 0.5, // тихо, фоном: дождь не должен заглушать реплики и эффекты
+    _rainLoop(gain, nodes) {
+      const c = this.ctx;
+      const start = (buf) => {
+        if (nodes.dead) return; // эмбиент уже сменился, пока декодировали
+        const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
+        const g = c.createGain(); g.gain.value = this.RAIN_GAIN;
+        src.connect(g); g.connect(gain); src.start(); nodes.push(src);
+      };
+      if (this.rainBuf) { start(this.rainBuf); return; }
+      if (!VN.RainMp3) return;
+      const bin = atob(VN.RainMp3), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const done = (raw) => { this.rainBuf = this._seamless(raw); start(this.rainBuf); };
+      const p = c.decodeAudioData(bytes.buffer, done, () => {});
+      if (p && p.catch) p.catch(() => {});
+    },
+    /** Бесшовная петля: срезать тишину mp3 по краям и вклеить хвост в начало (равномощный кроссфейд). */
+    _seamless(raw) {
+      const c = this.ctx, ch = raw.numberOfChannels, sr = raw.sampleRate;
+      const thr = 0.003; let s = 0, e = raw.length;
+      const loud = (i) => { for (let k = 0; k < ch; k++) if (Math.abs(raw.getChannelData(k)[i]) > thr) return true; return false; };
+      while (s < e && !loud(s)) s++;
+      while (e > s && !loud(e - 1)) e--;
+      const n = e - s, F = Math.min(Math.floor(sr * 0.35), Math.floor(n / 4));
+      if (n <= F * 2) return raw;
+      const out = c.createBuffer(ch, n - F, sr);
+      for (let k = 0; k < ch; k++) {
+        const src = raw.getChannelData(k), dst = out.getChannelData(k);
+        for (let i = 0; i < n - F; i++) dst[i] = src[s + i];
+        for (let i = 0; i < F; i++) {
+          const x = i / F; // начало нарастает, хвост затухает — равная мощность
+          dst[i] = src[s + i] * Math.sin(x * Math.PI / 2) + src[s + n - F + i] * Math.cos(x * Math.PI / 2);
+        }
       }
+      return out;
     },
     tracks: {}, sceneTrack: null, fightOn: false, playing: null,
 
@@ -208,7 +235,6 @@
     _duckAmbient(k) {
       this.duck = k;
       if (this.ctx && this.ambBus) this.ambBus.gain.setTargetAtTime(0.7 * k, this.ctx.currentTime, 0.4);
-      if (this.amb.rain) this._fade('rain', this._goal(this._el('rain')), 400);
     },
     /** Звук локации: дождь — только дождь; без дождя — фоновая музыка. */
     scene(loc) {
@@ -217,7 +243,6 @@
       else { this.music(null); this.ambient(loc.ambient); }
     },
     resumeMusic() {
-      if (this.pendingRain && this.amb.rain) { this.pendingRain = false; this._rain(true); }
       if (!this.pendingMusic || !this.playing) return;
       this.pendingMusic = false;
       const p = this._el(this.playing).a.play();
