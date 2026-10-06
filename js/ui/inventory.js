@@ -66,7 +66,7 @@
               if (S.hp >= S.maxHp) { b.disabled = true; b.textContent = 'ЗДОРОВЬЕ ПОЛНОЕ'; }
               b.addEventListener('click', (e) => {
                 e.stopPropagation();
-                VN.State.take(id, 1, true); VN.State.heal(it.heal);
+                VN.State.take(id, 1, true); VN.State.heal(it.heal); VN.Audio.sample('consume');
                 m.close(); this.open();
               });
               detail.appendChild(b);

@@ -38,7 +38,9 @@
       sp.classList.add('enter-' + enter);
       await VN.util.frame();
       sp.classList.add('in');
-      if (enter === 'drop') { VN.Audio.sfx('impact'); setTimeout(() => VN.Fx.shake(14), 380); }
+      if (id === 'shilo') VN.Audio.sample('goblin'); // Шило всегда появляется со своим криком
+      if (enter === 'drop') { if (id !== 'shilo') VN.Audio.sfx('impact'); setTimeout(() => VN.Fx.shake(14), 380); }
+      else if (id === 'shilo') { /* крика достаточно */ }
       else if (enter === 'glitch') VN.Audio.sfx('glitch');
       else VN.Audio.sfx('whoosh');
       await settle(sp.querySelector('.sprite-body'), enter === 'silhouette' ? 1300 : 800);

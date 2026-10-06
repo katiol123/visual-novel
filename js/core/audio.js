@@ -1,6 +1,6 @@
 /* ==========================================================================
    Звук: SFX и большая часть эмбиента синтезируются WebAudio на лету,
-   музыка и дождь — из файлов (assets/music). Общая громкость — ползунок
+   музыка, дождь (assets/music) и часть эффектов (assets/sfx) — из файлов. Общая громкость — ползунок
    (VN.Audio.setVolume, сохраняется между запусками).
    ========================================================================== */
 (function () {
@@ -84,9 +84,29 @@
 
     /* ---------- SFX ---------- */
     sfx(name) {
+      if (SFX_FILE[name]) { this.sample(SFX_FILE[name]); return; }
       if (!this.ctx) return;
       const s = SFX[name];
       if (s) s.call(this);
+    },
+
+    /* ---------- звуки из файлов (assets/sfx) ----------
+       Короткие одноразовые: HTMLAudio-клон на каждый запуск, чтобы звуки могли накладываться. */
+    SAMPLES: {
+      braam: { src: 'assets/sfx/braam.mp3', vol: 0.7 },      // название новой главы
+      click: { src: 'assets/sfx/click.mp3', vol: 0.5 },      // клики по кнопкам
+      goblin: { src: 'assets/sfx/goblin-cry.mp3', vol: 0.75 }, // крик Шила при появлении
+      consume: { src: 'assets/sfx/consume.mp3', vol: 0.6 },  // расходники: аптечка, еда, адреналин…
+    },
+    _smp: {},
+    sample(name) {
+      const t = this.SAMPLES[name];
+      if (!t || this.muted || this.vol <= 0) return;
+      if (!this._smp[name]) { this._smp[name] = new Audio(t.src); this._smp[name].preload = 'auto'; }
+      const a = this._smp[name].cloneNode();
+      a.volume = Math.min(1, t.vol * this.vol);
+      const p = a.play();
+      if (p && p.catch) p.catch(() => {});
     },
 
     tick() {
@@ -141,6 +161,8 @@
     TRACKS: {
       score: { src: 'assets/music/echoes-of-the-abyss.mp3', vol: 0.42 },
       fight: { src: 'assets/music/steel-tangerines.mp3', vol: 0.6 },
+      title: { src: 'assets/music/boltwater-halo.mp3', vol: 0.45 },  // главное меню
+      act2: { src: 'assets/music/circuit-tongues.mp3', vol: 0.42 },  // глава II (воспоминание) вместо обычной темы
     },
     /** Громкость, к которой должен прийти трек сейчас: его база × ползунок × приглушение в бою. */
     _goal(t) { return t.target * this.vol * (t.duckable ? this.duck : 1); },
@@ -239,7 +261,9 @@
     /** Звук локации: дождь — только дождь; без дождя — фоновая музыка. */
     scene(loc) {
       if (!loc) { this.ambient(null); this.music(null); return; }
-      if (loc.music) { this.ambient(loc.musicAmbient || null); this.music(loc.music); }
+      // в воспоминании (глава II) у сцен своя тема
+      const mus = loc.music === 'score' && VN.S && VN.S.act === 2 ? 'act2' : loc.music;
+      if (loc.music) { this.ambient(loc.musicAmbient || null); this.music(mus); }
       else { this.music(null); this.ambient(loc.ambient); }
     },
     resumeMusic() {
@@ -249,6 +273,9 @@
       if (p && p.catch) p.catch(() => { this.pendingMusic = true; });
     },
   };
+
+  /** Какие звуки заменены файлами игрока. */
+  const SFX_FILE = { click: 'click', select: 'click' };
 
   const SFX = {
     click() { this.tone(1800, 0.04, { type: 'square', gain: 0.04 }); },

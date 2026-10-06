@@ -576,7 +576,7 @@
       const it = VN.Items[id];
       VN.State.take(id, 1, true);
       this.itemUsed = true;
-      VN.Audio.sfx('item');
+      VN.Audio.sample('consume');
       if (it.heal) {
         const before = this.player.hp;
         this.player.hp = Math.min(this.player.maxHp, this.player.hp + it.heal);

@@ -44,7 +44,7 @@
         <div class="chapter-kicker">${kicker}</div>
         <div class="chapter-title">${title}</div>`;
       L.appendChild(c);
-      VN.Audio.sfx('impact');
+      VN.Audio.sample('braam');
       await VN.util.frame();
       c.classList.add('in');
       await sleep(VN.mode.skip ? 400 : 2600);

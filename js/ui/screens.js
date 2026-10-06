@@ -21,6 +21,7 @@
       VN.Backdrop.set('street');
       VN.Audio.combatMusic(false);
       VN.Audio.scene(VN.Locations.street);
+      VN.Audio.music('title'); // своя тема главного меню
       if (this.node) this.node.remove();
       const t = (this.node = el('div', 'title-screen'));
       const cast = ['shilo', 'shef', 'grokh', 'kir', 'texas', 'kong', 'bugai', 'ded'];
