@@ -171,3 +171,16 @@
 .cr-combat b { display: block; font-size: 22px; line-height: 1.1; }
 .cr-combat span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
 .cr-sec + .cr-perk, .cr-combat + .cr-perk { margin-top: 6px; padding-top: 0; border-top: 0; font-size: 15px; }
+
+/* заставка перед главным меню: первый клик включает звук */
+.splash { position: absolute; inset: 0; z-index: 90; background: radial-gradient(ellipse at 50% 45%, #0d140a 0%, #030403 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; cursor: pointer; opacity: 0; transition: opacity .6s; }
+.splash.in { opacity: 1; }
+.splash.out { opacity: 0; pointer-events: none; transition-duration: .8s; }
+.sp-kicker { font-family: var(--f-mono); font-size: 22px; letter-spacing: .35em; color: var(--acid); opacity: .8; }
+.sp-logo { display: flex; flex-direction: column; align-items: center; line-height: .95; }
+.sp-a { font-family: var(--f-display); font-size: 110px; color: var(--paper); text-shadow: 6px 6px 0 rgba(0,0,0,.6); }
+.sp-b { font-family: var(--f-display); font-size: 110px; color: var(--acid); text-shadow: 0 0 30px rgba(182,255,59,.6), 0 0 80px rgba(182,255,59,.35); animation: neonFlick 6s 2s infinite; }
+.sp-start { margin-top: 40px; font-family: var(--f-display); font-size: 34px; letter-spacing: .12em; padding: 18px 46px; background: transparent; color: var(--acid); border: 2px solid var(--acid); cursor: pointer; animation: spPulse 1.6s ease-in-out infinite; }
+.sp-start:hover { background: var(--acid); color: #0a0f05; animation: none; }
+.sp-hint { font-family: var(--f-cond); font-size: 16px; letter-spacing: .16em; color: #6e7a68; }
+@keyframes spPulse { 0%, 100% { box-shadow: 0 0 0 rgba(182,255,59,0); opacity: .75; } 50% { box-shadow: 0 0 30px rgba(182,255,59,.45); opacity: 1; } }

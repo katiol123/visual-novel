@@ -55,7 +55,34 @@
       if (e.code === 'KeyH') toggleUI();
     });
 
-    VN.Title.show();
+    splash();
+  }
+
+  /** Заставка «Нажмите, чтобы начать»: браузер даёт включить звук только после жеста игрока,
+      поэтому первый клик — здесь, и главное меню открывается уже с музыкой. */
+  function splash() {
+    const s = VN.util.el('div', 'splash');
+    s.innerHTML = `
+      <div class="sp-kicker">ПОРТ-ВЕТРОВ · 31.12</div>
+      <div class="sp-logo"><span class="sp-a">ПОСЛЕДНЯЯ</span><span class="sp-b">НОЧЬ ГОДА</span></div>
+      <button class="sp-start">НАЖМИТЕ, ЧТОБЫ НАЧАТЬ</button>
+      <div class="sp-hint">лучше в наушниках · звук можно настроить в меню</div>`;
+    document.getElementById('game').appendChild(s);
+    requestAnimationFrame(() => s.classList.add('in'));
+    let done = false;
+    const go = (e) => {
+      if (done) return;
+      done = true;
+      if (e) { e.preventDefault && e.preventDefault(); e.stopPropagation && e.stopPropagation(); }
+      window.removeEventListener('keydown', go, true);
+      VN.Audio.init();
+      VN.Audio.sfx('select');
+      s.classList.add('out');
+      setTimeout(() => s.remove(), 900);
+      VN.Title.show();
+    };
+    s.addEventListener('click', go);
+    window.addEventListener('keydown', go, true);
   }
 
   function toggleUI() {
