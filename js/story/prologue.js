@@ -670,7 +670,7 @@
             text: 'Рация: «Канал девять. Это Корвин. Ворота».', need: 'radio', time: 2,
             do: [
               { sfx: 'radio' },
-              { radio: '{whisper}…шшш…{/whisper} Конг. Пропусти. {pause=300}И не мешай ему.' },
+              { radio: '{whisper}{static}…шшш…{/static}{/whisper} Конг. Пропусти. {pause=300}И не мешай ему.' },
               { set: { kongRadio: true } },
               { kong: 'Есть, начальник! {pause=200}…Проходи, мужик. Без обид. Бананы — тоже без обид.' },
               { set: { grokhComing: true } },
@@ -891,7 +891,7 @@
             text: 'Рация: «Грох! Отзови своего Деда!»', need: 'radio',
             do: [
               { sfx: 'radio' },
-              { radio: '…Дед. Отбой. {pause=300}Корвин мне ещё нужен. Живым. И с ключом.' },
+              { radio: '{static}…Дед. Отбой.{/static} {pause=300}Корвин мне ещё нужен. Живым. И с ключом.' },
               { ded: 'Хо-хо. Как скажете, начальник. {pause=300}{i}Подарок подождёт.{/i}' },
               { set: { mikaSafe: true, grokhCalled: true, grokhComing: true } },
             ],

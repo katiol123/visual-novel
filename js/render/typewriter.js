@@ -2,6 +2,16 @@
    Печатная машинка с разметкой.
      {shake}…{/shake}  {wave}…{/wave}  {glitch}…{/glitch}
      {red} {green} {violet} {ice} {amber}  {i} {b} {big} {whisper}
+     Новые:
+     {static}  — помехи в трубке/рации: буквы мерцают и пропадают
+     {frost}   — иней: буквы проступают сквозь изморозь, синеют и дрожат от холода
+     {ghost}   — память: напечатано — и медленно выцветает, как старая фотография
+     {pulse}   — сердцебиение: текст бьётся, как пульс
+     {strike}  — вычеркнуто: красная черта по строчке, как в книге Совета
+     {redact}  — замазано чёрным: строчку вымарали из протокола
+     {cipher}  — шифр: каждая буква сперва перебирает случайные символы, потом «расшифровывается»
+     {neon}    — неон: мерцает, как вывеска с плохим контактом
+     {drip}    — кровь: красные буквы медленно стекают вниз
      {pause=400}  {speed=0.5}
    Все символы раскладываются заранее (невидимыми) → вёрстка не «прыгает».
    Слова завернуты в nowrap-обёртки → перенос только по пробелам.
@@ -10,7 +20,10 @@
   'use strict';
   const VN = window.VN;
 
-  const STYLE_TAGS = ['shake', 'wave', 'glitch', 'red', 'green', 'violet', 'ice', 'amber', 'i', 'b', 'big', 'whisper'];
+  const STYLE_TAGS = ['shake', 'wave', 'glitch', 'red', 'green', 'violet', 'ice', 'amber', 'i', 'b', 'big', 'whisper',
+    'static', 'frost', 'ghost', 'pulse', 'strike', 'redact', 'cipher', 'neon', 'drip'];
+  const RANDOM_FX = ['shake', 'glitch', 'static', 'frost', 'neon', 'drip']; // у этих — свой сдвиг фазы на каждую букву
+  const CIPHER = '#%&@$*0123456789ABCDEFЖЩЫЮЯ░▒▓/\\<>';
 
   function parse(src) {
     const out = [];
@@ -57,12 +70,23 @@
         s.className = 'ch' + (tok.cls.length ? ' ' + tok.cls.map((c) => 'fx-' + c).join(' ') : '');
         s.textContent = ch;
         if (tok.cls.includes('wave')) s.style.setProperty('--i', waveI++);
-        if (tok.cls.includes('shake') || tok.cls.includes('glitch')) s.style.setProperty('--r', Math.random().toFixed(2));
+        if (tok.cls.some((c) => RANDOM_FX.includes(c))) s.style.setProperty('--r', Math.random().toFixed(2));
+        if (tok.cls.includes('pulse') || tok.cls.includes('ghost')) s.style.setProperty('--i', waveI++);
         word.appendChild(s);
         chars.push(s);
       }
     }
     return { chars, actions };
+  }
+
+  /** {cipher}: буква несколько раз перебирает случайные символы, потом встаёт на место. */
+  function scramble(c) {
+    const real = c.textContent;
+    let n = 0;
+    const t = setInterval(() => {
+      if (++n > 7 || !c.isConnected) { clearInterval(t); c.textContent = real; c.classList.add('decoded'); return; }
+      c.textContent = CIPHER[Math.floor(Math.random() * CIPHER.length)];
+    }, 45);
   }
 
   function strip(src) { return src.replace(/\{[^}]*\}/g, ''); }
@@ -87,6 +111,7 @@
       if (a && a.pause && !a._done) { a._done = true; timer = setTimeout(step, a.pause / VN.mode.textSpeed); return; }
       const c = chars[i++];
       c.classList.add('on');
+      if (c.classList.contains('fx-cipher')) scramble(c);
       if (opts.sound !== false && i % 2) VN.Audio.tick();
       const t = c.textContent;
       let d = base / speed;
