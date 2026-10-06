@@ -122,11 +122,13 @@
     combatStatsFor(bg, stats, has) {
       let atkBonus = Math.max(0, stats.str - 1);
       if (has('knuckles')) atkBonus += 1;
-      if (bg === 'cop') atkBonus += 2; // выучка опера
+      // в воспоминании (глава II) опер — новичок: выучки ещё нет, есть злость
+      const rookie = bg === 'cop' && VN.S && VN.S.act === 2;
+      if (bg === 'cop') atkBonus += rookie ? 1 : 2; // выучка опера
       if (has('shilo_knife')) atkBonus += 1;
       return {
         dice: 3 + (bg === 'thief' ? 1 : 0),
-        rerolls: 1 + (bg === 'cop' ? 2 : 0),
+        rerolls: 1 + (bg === 'cop' && !rookie ? 2 : 0),
         atkBonus,
         blkBonus: bg === 'boxer' || bg === 'cop' ? 1 : 0,
         gun: has('revolver'),

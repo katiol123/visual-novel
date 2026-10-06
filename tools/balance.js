@@ -57,7 +57,7 @@ function fight(def, build) {
     let seen = attacking ? intent.value - intent.hiddenSum + intent.nHidden * (m.type === 'barrage' ? 3 : 3.5) : 0;
     if (attacking && intent.alt != null) seen = (seen + intent.alt) / 2;
     if (!healed && (p.hp - seen <= 4 || p.hp <= p.maxHp * 0.35)) { p.hp = Math.min(p.maxHp, p.hp + 8); healed = true; }
-    const n = Math.max(1, cs.dice + (st.round === 1 ? st.dice1 : 0) - (p.cuff ? 1 : 0)); p.cuff = false;
+    const n = Math.max(1, cs.dice + (st.round === 1 ? st.dice1 : 0) - (p.cuff ? 1 : 0) + R.diceMod(st)); p.cuff = false;
     let dv = []; for (let i = 0; i < n; i++) dv.push(d6());
     const stolen = R.afterRoll(st, dv); if (stolen >= 0) dv.splice(stolen, 1);
     for (let rr = 0; rr < cs.rerolls; rr++) {
@@ -71,7 +71,7 @@ function fight(def, build) {
     if (best.v.atk.length) {
       const dmg = Math.max(0, best.r.atk - e.guard - e.armor);
       e.hp -= dmg; if (e.hp <= 0) return res(true);
-      R.afterEnemyHit(st, dmg, 'atk'); if (p.hp <= 0) return res(false);
+      R.afterEnemyHit(st, dmg, 'atk'); if (e.fled) return res(true); if (p.hp <= 0) return res(false);
     }
     // ответ
     if (attacking) {
@@ -89,6 +89,7 @@ function fight(def, build) {
     for (const k of ['bleed', 'burn']) if (p[k] > 0) { p[k]--; p.hp -= 2; }
     R.endRound(st);
     if (e.hp <= 0) return res(true);
+    if (st.escaped) return res(false);
     if (p.hp <= 0) return res(false);
   }
   return res(false);

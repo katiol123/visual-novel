@@ -17,6 +17,9 @@
      drunk       — пьяный прицел: атаки сильнее на atk, но с шансом miss мимо
      cleaver     — пропущенный удар (хоть 1 урона) → кровотечение на 2 раунда
      audit       — каждые every раунда навсегда списывает у тебя один переброс
+     cold        — холод: с раунда from у тебя на куб меньше
+     bolt        — не хочет драться: при ≤ at·ХП сбегает (бой выигран, но он ушёл)
+     getaway     — рвётся к выходу: каждая его «защита» — шаг; на steps-м шаге уходит
 
    МОДИФИКАТОРЫ БОЯ (VN.CombatMods, передаются сюжетом через opts.mods):
      баффы союзников и дебаффы-обстоятельства: hp, dice, dice1, rerolls,
@@ -133,10 +136,18 @@
         intent.altVals = alt;
       }
       if (m.type === 'guard') e.guard = value;
+      const ga = P(def, 'getaway');
+      if (ga && m.type === 'guard') { e.steps = (e.steps || 0) + 1; log.push({ t: 'К ВЫХОДУ', sub: `шаг ${e.steps} из ${ga.steps}`, kind: 'bad' }); }
       e.lastType = m.type;
       if (m.type === 'charge') e.next = m.next;
       e.intent = intent;
       return { intent, log };
+    },
+
+    /** Поправка к числу твоих кубов в этом раунде (холод и т. п.). */
+    diceMod(st) {
+      const c = P(st.def, 'cold');
+      return c && st.round >= c.from ? -1 : 0;
     },
 
     /** После броска игрока: может украсть куб. Возвращает индекс украденного или -1. */
@@ -162,6 +173,8 @@
       const log = [], e = st.enemy;
       const th = P(st.def, 'thorns');
       if (th && kind === 'atk' && dmg > 0) { st.player.hp -= th.dmg; log.push({ t: 'ШИПЫ', sub: `−${th.dmg} тебе`, kind: 'bad', toPlayer: th.dmg }); }
+      const bo = P(st.def, 'bolt');
+      if (bo && e.hp > 0 && e.hp <= e.maxHp * bo.at && !e.fled) { e.fled = true; log.push({ t: 'СБЕЖАЛ', sub: 'бросил всё и рванул прочь', kind: 'gold' }); }
       const sw = P(st.def, 'secondWind');
       if (sw && !e.winded && e.hp > 0 && e.hp <= e.maxHp * sw.at) {
         e.winded = true; e.hp = Math.min(e.maxHp, e.hp + sw.heal);
@@ -183,6 +196,8 @@
     endRound(st) {
       const log = [];
       if (st.player.poison > 0) { st.player.hp -= st.player.poison; log.push({ t: 'ЯД', sub: `−${st.player.poison}`, kind: 'bad', toPlayer: st.player.poison }); }
+      const ga = P(st.def, 'getaway');
+      if (ga && (st.enemy.steps || 0) >= ga.steps && st.enemy.hp > 0) { st.escaped = true; log.push({ t: 'УШЁЛ', sub: 'он у выхода — и его уже нет', kind: 'bad' }); }
       const au = P(st.def, 'audit');
       if (au && st.round % au.every === 0 && st.cs.rerolls > 0) { st.cs.rerolls--; log.push({ t: 'АУДИТ', sub: `списан переброс — осталось ${st.cs.rerolls}`, kind: 'bad' }); }
       const rf = P(st.def, 'reinforce');
@@ -209,6 +224,9 @@
         drunk: (p) => ['ПЬЯНЫЙ ПРИЦЕЛ', `атаки +${p.atk}, но ${Math.round(p.miss * 100)}% — мимо`],
         cleaver: () => ['ТЕСАК', 'пропустил хоть 1 урона — кровотечение на 2 раунда'],
         audit: (p) => ['АУДИТ', `каждые ${p.every} раунда навсегда списывает твой переброс`],
+        cold: (p) => ['ИНЕЙ', `с ${p.from}-го раунда пальцы не слушаются: −1 куб`],
+        bolt: (p) => ['НЕ БОЕЦ', `при ${Math.round(p.at * 100)}% здоровья сбежит`],
+        getaway: (p) => ['К ОКНУ', `каждая его защита — шаг к выходу; ${p.steps}-й шаг — и он ушёл`],
       };
       return (def.passives || []).map((p) => { const f = T[p.id]; const [t, d] = f ? f(p) : [p.id, '']; return { t, d }; });
     },

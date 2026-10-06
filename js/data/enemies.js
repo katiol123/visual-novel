@@ -194,10 +194,10 @@
     /* ---------- глава II · воспоминание опера (10 лет назад) ---------- */
     kong_fb: {
       char: 'kong', threat: 1, name: '«КОНГ» · 19 ЛЕТ', sprite: SP + 'kong.png', color: '#ffe14d',
-      hp: 55, hidden: 0, armor: 0, passives: [],
+      hp: 58, hidden: 0, armor: 0, passives: [{ id: 'bolt', at: 0.5 }, { id: 'cold', from: 3 }],
       moves: [
-        { name: 'Дубинка сторожа', type: 'attack', dice: 2, bonus: 3, w: 3, desc: 'Машет, не глядя.' },
-        { name: 'Фонарь в глаза', type: 'attack', dice: 1, bonus: 5, w: 2, desc: 'Слепит и толкает.' },
+        { name: 'Дубинка сторожа', type: 'attack', dice: 2, bonus: 4, w: 3, desc: 'Машет, не глядя.' },
+        { name: 'Фонарь в глаза', type: 'attack', dice: 1, bonus: 6, w: 2, desc: 'Слепит и толкает.' },
         { name: 'Пятится к двери', type: 'guard', dice: 2, w: 1, desc: 'Прикрывается дверью.' },
       ],
       taunts: ['Я ничего не видел!', 'Не подходи, начальник!', 'Мне сказали — не пускать!'],
@@ -205,11 +205,11 @@
     },
     bugai_fb: {
       char: 'bugai', threat: 3, name: 'ТАРАС «БУГАЙ» · 10 ЛЕТ НАЗАД', sprite: SP + 'bugai.png', color: '#c27bff',
-      hp: 78, hidden: 1, armor: 1, passives: [{ id: 'enrage', at: 0.5, atk: 3 }],
+      hp: 69, hidden: 1, armor: 1, passives: [{ id: 'getaway', steps: 3 }],
       moves: [
         { name: 'Кулак', type: 'attack', dice: 2, bonus: 4, w: 3, desc: 'Ещё без кастета. Пока.' },
         { name: 'Швырнуть стулом', type: 'attack', dice: 1, bonus: 7, w: 2, desc: 'Что под руку попало.' },
-        { name: 'Прикрыть сейф', type: 'guard', dice: 2, bonus: 2, w: 1, desc: 'Спиной к сейфу.' },
+        { name: 'Шаг к окну', type: 'guard', dice: 2, bonus: 2, w: 2, desc: 'Пятится к окну, прикрываясь стулом. Три шага — и он ушёл.' },
       ],
       taunts: ['Иди домой, мент.', 'Это не твоё дело.', 'Тебе скажут — несчастный случай.'],
       hurt: ['Хм.', 'Крепкий.', 'ГРРА!'],

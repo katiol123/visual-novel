@@ -254,6 +254,7 @@
       if (this.enemy.guard) es.push(`<span class="st guard">БЛОК ${this.enemy.guard}</span>`);
       if (this.enemy.stunned) es.push('<span class="st stun">ОГЛУШЁН</span>');
       if (this.enemy.dazed) es.push('<span class="st stun">ОСЛЕПЛЁН</span>');
+      if (this.enemy.steps) es.push(`<span class="st bleed">К ВЫХОДУ ${this.enemy.steps}</span>`);
       this.$('.cb-estatus').innerHTML = es.join('');
     }
 
@@ -391,7 +392,7 @@
     async playerRoll() {
       this.dice.forEach((d) => d.d.el.remove());
       this.dice = [];
-      const n = Math.max(1, this.cs.dice + (this.st.round === 1 ? this.st.dice1 : 0) - (this.player.cuff ? 1 : 0));
+      const n = Math.max(1, this.cs.dice + (this.st.round === 1 ? this.st.dice1 : 0) - (this.player.cuff ? 1 : 0) + Rules.diceMod(this.st));
       this.player.cuff = false;
       this.maxRerolls = this.cs.rerolls;
       this.rerolls = this.cs.rerolls;
@@ -639,6 +640,7 @@
         await sleep(dmg >= 14 ? 900 : 550);
         if (this.enemy.hp <= 0) return this.finish('win');
         await this.applyLog(Rules.afterEnemyHit(this.st, dmg, 'atk'));
+        if (this.enemy.fled) return this.finish('win');
         if (this.player.hp <= 0) return this.finish('lose');
       }
 
@@ -659,6 +661,7 @@
       }
       await this.applyLog(Rules.endRound(this.st));
       if (this.enemy.hp <= 0) return this.finish('win');
+      if (this.st.escaped) return this.finish('escaped');
       if (this.player.hp <= 0) return this.finish('lose');
       this.nextRound();
     }
@@ -782,7 +785,11 @@
       this.tickClock();
       this.updateRes();
       VN.Audio.combatMusic(false);
-      const words = { win: ['ЧИСТО', 'противник повержен'], lose: ['НОКАУТ', 'ты на асфальте'], fled: ['УШЁЛ', 'не сегодня'] };
+      const words = { win: this.enemy.fled ? ['СБЕЖАЛ', 'он бросил всё и ушёл'] : ['ЧИСТО', 'противник повержен'], lose: ['НОКАУТ', 'ты на асфальте'], fled: ['УШЁЛ', 'не сегодня'], escaped: ['УШЁЛ', 'он ушёл — с тем, за чем приходил'] };
+      // исход для сюжета: «сбежал» — это победа с пометкой, «ушёл с добычей» — поражение с пометкой
+      VN.S.flags._enemyFled = !!this.enemy.fled;
+      VN.S.flags._enemyEscaped = result === 'escaped';
+      if (result === 'escaped') result = 'lose';
       if (result === 'win') { this.$('.cb-esprite').classList.add('ko'); VN.Audio.sfx('impact'); }
       if (result === 'lose') { VN.Fx.flash('rgba(120,0,10,0.8)', 900); this.root.classList.add('dead'); VN.Audio.sfx('impact'); }
       await sleep(700);
