@@ -98,6 +98,9 @@
       { banshik: 'С лёгким паром. {pause=300}Тебя ждут, Корсак. Но не так.' },
       {
         choice: [
+          { text: 'Отодвинуть его с дороги. Молча.', check: { stat: 'str', dc: 10 },
+            pass: [{ n: 'Я положил ладонь ему на грудь и просто пошёл вперёд. Он сделал шаг назад. Потом ещё один.' }, { banshik: '…Проходи. Вода горячая.' }, { hide: 'banshik' }, { goto: 'a1_banya' }],
+            fail: [{ banshik: 'Тяжёлый, да? {pause=300}Я тоже.' }, { jump: 'fight' }] },
           { text: '«Я на Совет. Меня вызывали».', check: { stat: 'nrv', dc: 10 }, pass: [{ banshik: '…Проходи. Вода горячая.' }, { hide: 'banshik' }, { goto: 'a1_banya' }], fail: [{ jump: 'fight' }] },
           { text: 'Драться.', do: [{ jump: 'fight' }] },
         ],

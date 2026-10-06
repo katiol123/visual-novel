@@ -45,7 +45,7 @@
             <div class="tr-scale"><i class="beam"><b class="pan l"></b><b class="pan r"></b></i><i class="post"></i></div>
             <div class="tr-sums"><div><span>ТЫ ДАЁШЬ</span><b class="s-off">0</b></div><div><span>ЦЕНА</span><b class="s-price">0</b></div></div>
             <div class="tr-verdict"></div>
-            <div class="tr-btns"><button class="btn btn-ghost tr-hag">ТОРГОВАТЬСЯ <small>НРВ ${m.haggleDc}</small></button><button class="btn btn-acid tr-deal" disabled>ПО РУКАМ</button></div>
+            <div class="tr-btns"><button class="btn btn-ghost tr-hag">ТОРГОВАТЬСЯ <small>${S.background === 'cop' && VN.State.has('badge') && !S.flags['badgeTried_' + mid] ? 'ЖЕТОН · ' : ''}НРВ ${m.haggleDc}</small></button><button class="btn btn-acid tr-deal" disabled>ПО РУКАМ</button></div>
           </div>
           <div class="tr-col tr-his"><h3>У НЕГО</h3><div class="tr-list"></div></div>`;
         md.body.appendChild(wrap);
@@ -99,10 +99,31 @@
           e.stopPropagation();
           if (haggled || e.currentTarget.disabled) return;
           haggled = true;
+          const quote = wrap.querySelector('.tr-quote');
+          // Жетон опера: первая попытка у каждого торговца. Иногда работает сам по себе (~30%),
+          // а враг может и «стукнуть» в участок — тогда розыск.
+          const badgeKey = 'badgeTried_' + mid;
+          if (S.background === 'cop' && VN.State.has('badge') && !S.flags[badgeKey]) {
+            S.flags[badgeKey] = true;
+            VN.Audio.sfx('stamp');
+            if (foe && Math.random() < 0.5) {
+              quote.textContent = `«${m.lines.snitch || 'Жетон, значит… А ну-ка подожди.'}» — он потянулся к телефону.`;
+              VN.State.set('wanted', true);
+              await VN.util.sleep(1400);
+            } else if (Math.random() < 0.3) {
+              haggle = 0.75;
+              quote.textContent = `«${m.lines.badge || 'Убери железку. Скину.'}»`;
+              render();
+              return;
+            } else {
+              quote.textContent = '«Жетон? Видали мы жетоны.» — не впечатлило.';
+              await VN.util.sleep(1100);
+            }
+          }
           const ok = await VN.Checks.run({ stat: 'nrv', dc: m.haggleDc, label: 'Сбить цену' });
           haggle = ok ? 0.75 : 1.25;
           if (!ok) VN.State.addRel(m.char, -1, true);
-          wrap.querySelector('.tr-quote').textContent = `«${ok ? m.lines.win : m.lines.lose}»`;
+          quote.textContent = `«${ok ? m.lines.win : m.lines.lose}»`;
           render();
         });
         wrap.querySelector('.tr-deal').addEventListener('click', (e) => {
