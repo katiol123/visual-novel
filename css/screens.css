@@ -164,3 +164,10 @@
    сплющивает куб и на миг показывает не ту грань */
 .die.landed { animation: land .35s ease-out; }
 @keyframes land { 40% { transform: scale(1.12); } }
+
+/* карточка предыстории: одинаковая разметка «в бою / вне боя» */
+.cr-sec { margin-top: 12px; font-size: 12px; letter-spacing: .3em; color: #9b1020; font-weight: 700; }
+.cr-combat { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 6px; text-align: center; }
+.cr-combat b { display: block; font-size: 22px; line-height: 1.1; }
+.cr-combat span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
+.cr-sec + .cr-perk, .cr-combat + .cr-perk { margin-top: 6px; padding-top: 0; border-top: 0; font-size: 15px; }

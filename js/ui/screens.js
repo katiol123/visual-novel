@@ -88,8 +88,15 @@
             <div class="cr-name">${b.name}</div>
             <div class="cr-stats">${Object.entries(VN.State.STATS).map(([k, st]) => `<div style="--c:${st.color}"><span>${st.name}</span><b>${'<i></i>'.repeat(b.stats[k])}${'<i class="off"></i>'.repeat(3 - b.stats[k])}</b></div>`).join('')}</div>
             <p>${b.text}</p>
-            <div class="cr-perk">${b.perk}</div>
-            <div class="cr-hp">ЗДОРОВЬЕ ${b.hp} · ${VN.Items[b.item].name}</div>
+            ${(() => {
+              const c = VN.State.combatStatsFor(id, b.stats, (x) => x === b.item);
+              const cell = (k, v) => `<div><b>${v}</b><span>${k}</span></div>`;
+              return `<div class="cr-sec">В БОЮ</div>
+                <div class="cr-combat">${cell('кубы', c.dice)}${cell('перебросы', c.rerolls)}${cell('удар', '+' + c.atkBonus)}${cell('блок', '+' + c.blkBonus)}${cell('здоровье', b.hp)}</div>
+                <div class="cr-perk">${b.perk}</div>
+                <div class="cr-sec">ВНЕ БОЯ</div>
+                <div class="cr-perk">${b.field}</div>`;
+            })()}
             <div class="cr-stamp">ПРИНЯТО</div>`;
           c.addEventListener('mouseenter', () => VN.Audio.sfx('hover'));
           c.addEventListener('click', async (e) => {

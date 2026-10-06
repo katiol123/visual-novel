@@ -114,17 +114,22 @@
 
     /* ---- производные боевые параметры ---- */
     combatStats() {
-      const S = VN.S, bg = S.background;
-      let atkBonus = Math.max(0, S.stats.str - 1);
-      if (this.has('knuckles')) atkBonus += 1;
+      const S = VN.S;
+      return this.combatStatsFor(S.background, S.stats, (id) => this.has(id));
+    },
+
+    /** Боевые параметры для предыстории — и в бою, и на карточке выбора. */
+    combatStatsFor(bg, stats, has) {
+      let atkBonus = Math.max(0, stats.str - 1);
+      if (has('knuckles')) atkBonus += 1;
       if (bg === 'cop') atkBonus += 2; // выучка опера
-      if (this.has('shilo_knife')) atkBonus += 1;
+      if (has('shilo_knife')) atkBonus += 1;
       return {
         dice: 3 + (bg === 'thief' ? 1 : 0),
         rerolls: 1 + (bg === 'cop' ? 2 : 0),
         atkBonus,
         blkBonus: bg === 'boxer' || bg === 'cop' ? 1 : 0,
-        gun: this.has('revolver'),
+        gun: has('revolver'),
         shotMult: 3, // ВЫСТРЕЛ: куб ×3, шестёрка — 18 сквозь защиту
       };
     },
