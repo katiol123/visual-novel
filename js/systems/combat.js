@@ -19,6 +19,7 @@
   'use strict';
   const VN = window.VN;
   const { el, sleep, pick, clamp } = VN.util;
+  const sgn = (x) => (x < 0 ? '−' + -x : '+' + x);
 
   const Rules = VN.CombatRules;
   const evaluate = Rules.evaluate;
@@ -82,7 +83,7 @@
           <div class="cb-tray" data-zone="tray"><label>ЛОТОК · кубы здесь можно перебросить</label><div class="zone"></div></div>
           <div class="cb-slots">
             <div class="slot s-atk" data-zone="atk"><header>УДАР <em>+${this.cs.atkBonus}</em></header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer></div>
-            <div class="slot s-blk" data-zone="blk"><header>БЛОК ${this.cs.blkBonus ? `<em>+${this.cs.blkBonus}</em>` : ''}</header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer></div>
+            <div class="slot s-blk" data-zone="blk"><header>БЛОК ${this.cs.blkBonus ? `<em>${sgn(this.cs.blkBonus)}</em>` : ''}</header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer></div>
             <div class="slot s-shot" data-zone="shot"><header>ВЫСТРЕЛ <em>×${this.cs.shotMult || 2}</em></header><div class="zone"></div><footer><b class="sum">0</b><span class="combo"></span></footer><div class="slot-lock"></div></div>
           </div>
         </div>
@@ -140,7 +141,7 @@
           <div class="ci-tag">ФИГУРАНТ №1 · ${bg.name || ''}</div>
           <div class="ci-name">ЯН<br>КОРСАК</div>
           ${row('ЗДОРОВЬЕ', `${this.player.hp}/${this.player.maxHp}`)}${bar(this.player.hp, this.player.maxHp)}
-          ${row('КУБЫ', cs.dice + (this.st.dice1 ? ` <small>(${this.st.dice1 > 0 ? '+' : ''}${this.st.dice1} в 1-м раунде)</small>` : ''))}${row('ПЕРЕБРОСЫ', cs.rerolls)}${row('УДАР', '+' + cs.atkBonus)}${row('БЛОК', '+' + cs.blkBonus)}
+          ${row('КУБЫ', cs.dice + (this.st.dice1 ? ` <small>(${this.st.dice1 > 0 ? '+' : ''}${this.st.dice1} в 1-м раунде)</small>` : ''))}${row('ПЕРЕБРОСЫ', cs.rerolls)}${row('УДАР', sgn(cs.atkBonus))}${row('БЛОК', sgn(cs.blkBonus))}
         </div>
         <div class="ci-enemy"><img src="${d.sprite}" alt="" draggable="false"></div>
         <div class="ci-card ci-right">

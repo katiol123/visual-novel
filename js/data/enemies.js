@@ -229,10 +229,10 @@
     /* ---------- глава II · воспоминание карманника (год назад) ---------- */
     valet_fb: {
       char: 'valet', threat: 2, name: '«ВАЛЕТ» · ПОСЛЕДНИЙ ТРАМВАЙ', sprite: SP + 'valet.png', color: '#c27bff',
-      hp: 60, hidden: 2, armor: 0, passives: [{ id: 'sway', blk: 2 }],
+      hp: 40, hidden: 1, armor: 0, passives: [{ id: 'steal' }, { id: 'sway', blk: 1 }],
       moves: [
-        { name: 'Бритва из манжеты', type: 'attack', dice: 2, bonus: 5, w: 3, desc: 'Тонко. Почти без боли — сначала.' },
-        { name: 'Локтем в солнышко', type: 'attack', dice: 1, bonus: 8, w: 2, desc: 'Как в давке на остановке.' },
+        { name: 'Бритва из манжеты', type: 'attack', dice: 2, bonus: 3, w: 3, desc: 'Тонко. Почти без боли — сначала.' },
+        { name: 'Локтем в солнышко', type: 'attack', dice: 1, bonus: 6, w: 2, desc: 'Как в давке на остановке.' },
         { name: 'За поручень', type: 'guard', dice: 2, bonus: 1, w: 1, desc: 'Трамвай качнуло — он уже в стороне.' },
       ],
       taunts: ['Я тебя этому не учил.', 'Руки помнят, Ян. А голова?', 'Заказ есть заказ, ученик.'],
