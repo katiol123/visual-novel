@@ -38,14 +38,11 @@
         <div class="title-logo">
           <div class="tl-kicker">ПОРТ-ВЕТРОВ · 31.12 · 23:07</div>
           <h1><span class="tl-a">ПОСЛЕДНЯЯ</span><span class="tl-b">НОЧЬ ГОДА</span></h1>
-          <div class="tl-sub">криминальная драма · пролог · 8 концовок</div>
+          <div class="tl-sub">криминальная драма</div>
         </div>
         <div class="title-menu">
           <button data-a="new">НОВОЕ ДЕЛО</button>
           <button data-a="cont" ${hasSave ? '' : 'disabled'}>ПРОДОЛЖИТЬ</button>
-          <button data-a="act1" ${VN.State.peekActStart(1) ? '' : 'disabled'} title="Продолжить с последнего финала пролога">ГЛАВА I</button>
-          ${VN.State.peekActStart(2) ? '<button data-a="act2" title="Продолжить с последнего финала главы I">ГЛАВА II</button>' : ''}
-          ${VN.State.peekActStart(3) ? '<button data-a="act3" title="Продолжить с последнего воспоминания">ГЛАВА III</button>' : ''}
           <button data-a="load">ЗАГРУЗИТЬ</button>
           <button data-a="board">КОНЦОВКИ <small>${ends}/${Object.keys(VN.Endings).length}</small></button>
         </div>
@@ -56,11 +53,22 @@
       // Секретные коды на титуле (по физическим клавишам — работают и в русской раскладке):
       //   test1 — сразу главу II за опера, test2 — за боксёра, test3 — за карманника.
       //   test4 / test5 / test6 — главу III за опера / боксёра / карманника со случайным прошлым.
+      //   test7 / test8 / test9 — главу IV (финал) за опера / боксёра / карманника, прошлое случайное.
       let typed = '';
-      const codes = { KeyT: 't', KeyE: 'e', KeyS: 's', Digit1: '1', Numpad1: '1', Digit2: '2', Numpad2: '2', Digit3: '3', Numpad3: '3', Digit4: '4', Numpad4: '4', Digit5: '5', Numpad5: '5', Digit6: '6', Numpad6: '6' };
+      const codes = { KeyT: 't', KeyE: 'e', KeyS: 's', Digit1: '1', Numpad1: '1', Digit2: '2', Numpad2: '2', Digit3: '3', Numpad3: '3', Digit4: '4', Numpad4: '4', Digit5: '5', Numpad5: '5', Digit6: '6', Numpad6: '6', Digit7: '7', Numpad7: '7', Digit8: '8', Numpad8: '8', Digit9: '9', Numpad9: '9' };
       const onCode = (ev) => {
         if (this.node !== t) { window.removeEventListener('keydown', onCode, true); return; }
         typed = (typed + (codes[ev.code] || '·')).slice(-5);
+        const test4 = { test7: 'cop', test8: 'boxer', test9: 'thief' }[typed];
+        if (test4) {
+          window.removeEventListener('keydown', onCode, true);
+          this.hide();
+          const past = VN.TestPast4(test4);
+          VN.mode.auto = VN.mode.skip = false;
+          VN.Toast.show(`<small>ТЕСТ · ГЛАВА IV</small><b>${VN.Backgrounds[test4].name} · ${VN.Endings[past].title}</b>`, 'item', VN.Icons[VN.Backgrounds[test4].icon]);
+          VN.Runner.start('a4_start', 0);
+          return;
+        }
         const test3 = { test4: 'cop', test5: 'boxer', test6: 'thief' }[typed];
         if (test3) {
           window.removeEventListener('keydown', onCode, true);
@@ -97,7 +105,7 @@
           if (a === 'act1') { this.hide(); VN.State.loadActStart(1); VN.mode.auto = VN.mode.skip = false; VN.Runner.start('a1_start', 0); }
           if (a === 'act2') { this.hide(); VN.State.loadActStart(2); VN.mode.auto = VN.mode.skip = false; VN.Runner.start('a2_start', 0); }
           if (a === 'act3') { this.hide(); VN.State.loadActStart(3); VN.mode.auto = VN.mode.skip = false; VN.Runner.start('a3_start', 0); }
-          if (a === 'board') VN.Board.open();
+          if (a === 'board') VN.Gallery.open();
         });
       });
     },
@@ -203,6 +211,31 @@
     },
   };
 
+  /* ---------------- галерея концовок (титул) ---------------- */
+  const GALLERY_TABS = [[0, 'ПРОЛОГ'], [1, 'ГЛАВА I'], [2, 'ГЛАВА II'], [3, 'ГЛАВА III'], [4, 'ГЛАВА IV']];
+  VN.Gallery = {
+    open(tab) {
+      const m = VN.Modal.open('gallery', 'КОНЦОВКИ', 'Выбери главу: открытые концовки — и те, что ещё впереди.');
+      let cur = tab != null ? tab : 0;
+      const render = () => {
+        const list = Object.entries(VN.Endings).filter(([, e]) => (e.act || 0) === cur);
+        const got = list.filter(([k]) => VN.Meta.data.endings[k]).length;
+        m.body.innerHTML = `<div class="gal-tabs">${GALLERY_TABS.map(([n, t]) => {
+          const all = Object.entries(VN.Endings).filter(([, e]) => (e.act || 0) === n);
+          const g = all.filter(([k]) => VN.Meta.data.endings[k]).length;
+          return `<button class="gal-tab${n === cur ? ' on' : ''}" data-t="${n}">${t} <small>${g}/${all.length}</small></button>`;
+        }).join('')}</div>
+          <p class="gal-count">Открыто: <b>${got}</b> из ${list.length}</p>
+          <div class="ends gal-ends">${list.map(([id, e]) => {
+            const ok = VN.Meta.data.endings[id];
+            return `<div class="end ${ok ? 'got' : ''}" style="--c:${e.color}"><b>${ok ? e.title : '? ? ?'}</b><span>${ok ? e.sub : 'ещё не открыта'}</span></div>`;
+          }).join('')}</div>`;
+        m.body.querySelectorAll('.gal-tab').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); VN.Audio.sfx('click'); cur = +b.dataset.t; render(); }));
+      };
+      render();
+    },
+  };
+
   /* ---------------- концовка ---------------- */
   const Ending = {
     show(id) {
@@ -221,7 +254,7 @@
         const actEnds = Object.entries(VN.Endings).filter(([, x]) => (x.act || 0) === act);
         const gotEnds = actEnds.filter(([k]) => VN.Meta.data.endings[k]).length;
         if (e.next) { S.flags[act ? 'act' + act + 'Ending' : 'prologueEnding'] = id; VN.State.saveActStart(act + 1); }
-        const ACTN = ['ПРОЛОГА', 'ГЛАВЫ I', 'ГЛАВЫ II', 'ГЛАВЫ III'], NEXT = { a1_start: 'ГЛАВА I · «ЧЁРНАЯ БУХГАЛТЕРИЯ»', a2_start: 'ГЛАВА II · «ЧТО БЫЛО ДО»', a3_start: 'ГЛАВА III · «НАВЕРХУ»' };
+        const ACTN = ['ПРОЛОГА', 'ГЛАВЫ I', 'ГЛАВЫ II', 'ГЛАВЫ III', 'ИСТОРИИ'], NEXT = { a1_start: 'ГЛАВА I · «ЧЁРНАЯ БУХГАЛТЕРИЯ»', a2_start: 'ГЛАВА II · «ЧТО БЫЛО ДО»', a3_start: 'ГЛАВА III · «НАВЕРХУ»', a4_start: 'ГЛАВА IV · «САЛЬДО»' };
         const actClues = Object.keys(VN.Clues).filter((k) => (VN.Clues[k].act || 0) === act);
         const clues = actClues.filter((k) => S.flags[k]).length;
         const s = el('div', 'screen ending');
@@ -232,11 +265,11 @@
           <div class="en-sub">${e.sub}</div>
           <div class="en-stats">
             ${S.clock && S.clock.still ? '' : `<div><b>${VN.State.clock()}</b><span>время</span></div>`}
-            <div><b>${blocks}/${total}</b><span>блоков пройдено</span></div>
+            <div><b>${blocks}/${total}</b><span>локаций посещено</span></div>
             <div><b>${clues}/${actClues.length}</b><span>улик</span></div>
-            <div><b>${gotEnds}/${actEnds.length}</b><span>концовок ${act ? 'главы' : 'пролога'}</span></div>
+            <div><b>${gotEnds}/${actEnds.length}</b><span>концовок ${act === 4 ? 'истории' : act ? 'главы' : 'пролога'}</span></div>
           </div>
-          <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act === 3 && id !== 'a3_off' ? 'Конец главы III. Продолжение — в следующих главах' : 'Этот путь обрывается здесь'}</div>
+          <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act === 4 ? 'Сальдо подведено. Так закончилась история Яна Корсака — из всех, что могли случиться, эта' : 'Этот путь обрывается здесь'}</div>
           <div class="en-btns">${e.next ? `<button class="btn btn-acid" data-a="next">${NEXT[e.next] || 'ДАЛЬШЕ'} →</button>` : ''}<button class="btn ${e.next ? 'btn-ghost' : 'btn-acid'}" data-a="new">НОВОЕ ДЕЛО</button><button class="btn btn-ghost" data-a="board">ДОСКА УЛИК</button><button class="btn btn-ghost" data-a="menu">ГЛАВНОЕ МЕНЮ</button></div>`;
         s.addEventListener('click', (ev) => ev.stopPropagation());
         s.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', (ev) => {

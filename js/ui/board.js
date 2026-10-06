@@ -66,7 +66,7 @@
       const found = own.filter((k) => S.flags[k]);
       const carried = VN.cluesFor(act).filter((k) => (VN.Clues[k].act || 0) < act && S.flags[k]);
       side.innerHTML = `
-        <h3>УЛИКИ${['', ' · ГЛАВА I', ' · ВОСПОМИНАНИЕ', ' · ГЛАВА III'][act] || ''} <small>${found.length}/${own.length}</small></h3>
+        <h3>УЛИКИ${['', ' · ГЛАВА I', ' · ВОСПОМИНАНИЕ', ' · ГЛАВА III', ' · ГЛАВА IV'][act] || ''} <small>${found.length}/${own.length}</small></h3>
         <div class="notes">${found.length ? found.map(note).join('') : '<p class="muted">Пока пусто. Задавай вопросы.</p>'}</div>
         ${carried.length ? `<h3>${act === 1 ? 'ИЗ ПРОЛОГА' : 'ИЗ ПРОШЛОГО'} <small>ещё сработают</small></h3><div class="notes">${carried.map(note).join('')}</div>` : ''}
         ${(() => {
@@ -77,7 +77,7 @@
             return `<div class="rel ${f ? 'f' : x ? 'x' : ''}" style="--c:${ch.color}"><b>${ch.short || ch.name}</b><span>${f ? 'друг' : x ? 'враг' : '?'}</span></div>`;
           }).join('')}</div>`;
         })()}
-        <h3>КОНЦОВКИ ${['ПРОЛОГА', 'ГЛАВЫ I', 'ВОСПОМИНАНИЯ', 'ГЛАВЫ III'][act] || ''}</h3>
+        <h3>КОНЦОВКИ ${['ПРОЛОГА', 'ГЛАВЫ I', 'ВОСПОМИНАНИЯ', 'ГЛАВЫ III', 'ИСТОРИИ'][act] || ''}</h3>
         <div class="ends">${Object.entries(VN.Endings).filter(([, e]) => (e.act || 0) === act).map(([id, e]) => {
           const got = VN.Meta.data.endings[id];
           return `<div class="end ${got ? 'got' : ''}" style="--c:${e.color}"><b>${got ? e.title : '? ? ?'}</b><span>${got ? e.sub : 'не открыта'}</span></div>`;

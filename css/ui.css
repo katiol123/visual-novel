@@ -239,3 +239,13 @@
 
 /* улики прошлого акта — бледнее, но на месте */
 .board-side .note.old { opacity: .78; filter: sepia(.35); }
+
+/* галерея концовок на титуле: вкладки по главам */
+.gal-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.gal-tab { font-family: var(--f-display); font-size: 18px; letter-spacing: .06em; padding: 8px 14px; background: rgba(255,255,255,.04); border: 1px solid #333; color: #8a8576; cursor: pointer; }
+.gal-tab small { font-size: 13px; opacity: .7; margin-left: 4px; }
+.gal-tab:hover { color: #e8e2d0; border-color: #666; }
+.gal-tab.on { color: #b6ff3b; border-color: #b6ff3b; background: rgba(182,255,59,.08); }
+.gal-count { color: #8a8576; margin: 0 0 10px; }
+.gal-count b { color: #e8e2d0; }
+.gal-ends { max-height: 62vh; overflow-y: auto; padding-right: 6px; }

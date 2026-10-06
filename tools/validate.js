@@ -5,8 +5,8 @@ const G = path.join(__dirname, '..', 'js') + '/';
 const ctx = { console, localStorage: { getItem: () => null, setItem() {} }, setTimeout, Math, document: { fonts: null } };
 ctx.window = ctx; vm.createContext(ctx);
 const files = ['core/namespace.js', 'core/state.js', 'data/characters.js', 'data/items.js', 'data/enemies.js', 'data/codex.js', 'data/combat-mods.js', 'data/merchants.js',
-  'render/backdrop.js', 'data/locations.js', 'data/locations-act1.js', 'systems/combat-rules.js', 'engine/story.js',
-  'story/prologue.js', 'story/endings.js', 'story/act1.js', 'story/act1-mid.js', 'story/act1-mid2.js', 'story/act1-end.js', 'story/act2.js', 'story/act2-cop.js', 'story/act2-boxer.js', 'story/act2-thief.js', 'story/act3.js', 'story/act3-mid.js', 'story/act3-end.js'];
+  'render/backdrop.js', 'data/locations.js', 'data/locations-act1.js', 'data/locations-act4.js', 'systems/combat-rules.js', 'engine/story.js',
+  'story/prologue.js', 'story/endings.js', 'story/act1.js', 'story/act1-mid.js', 'story/act1-mid2.js', 'story/act1-end.js', 'story/act2.js', 'story/act2-cop.js', 'story/act2-boxer.js', 'story/act2-thief.js', 'story/act3.js', 'story/act3-mid.js', 'story/act3-end.js', 'story/act4.js', 'story/act4-end.js'];
 for (const f of files) vm.runInContext(fs.readFileSync(G + f, 'utf8'), ctx, { filename: f });
 const VN = ctx.VN, errs = [];
 const scenes = VN.Story.all();

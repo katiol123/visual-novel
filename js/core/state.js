@@ -126,11 +126,12 @@
       const rookie = bg === 'cop' && VN.S && VN.S.act === 2;
       if (bg === 'cop') atkBonus += rookie ? 1 : 2; // выучка опера
       if (has('shilo_knife')) atkBonus += 1;
+      if (has('bolt')) atkBonus += 1; // засов камеры №2 (глава III)
       return {
         dice: 3 + (bg === 'thief' ? 1 : 0),
         rerolls: 1 + (bg === 'cop' && !rookie ? 2 : 0),
         atkBonus,
-        blkBonus: bg === 'boxer' || bg === 'cop' ? 1 : 0,
+        blkBonus: (bg === 'boxer' || bg === 'cop' ? 1 : 0) + (has('vest') ? 1 : 0), // «Кираса» с барахолки (глава III)
         gun: has('revolver'),
         shotMult: 3, // ВЫСТРЕЛ: куб ×3, шестёрка — 18 сквозь защиту
       };
