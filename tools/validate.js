@@ -40,6 +40,6 @@ const ends = Object.keys(VN.Endings), used = new Set();
 for (const id of Object.keys(scenes)) VN.Story.get(id).compiled.forEach((c) => c.ending && used.add(c.ending));
 ends.forEach((e) => chk(used.has(e), `концовка «${e}» нигде не вызывается`));
 const blocks = (a) => new Set(VN.Story.blocks(a).map((s) => s.block)).size;
-console.log(`Сцен: ${Object.keys(scenes).length} · блоков пролога: ${blocks(0)} · блоков главы I: ${blocks(1)} · концовок: ${ends.length}`);
+console.log(`Сцен: ${Object.keys(scenes).length} · блоков пролога: ${blocks(0)} · главы I: ${blocks(1)} · главы II: ${blocks(2)} · концовок: ${ends.length}`);
 console.log(errs.length ? 'ОШИБКИ:\n' + errs.join('\n') : 'Ошибок нет.');
 process.exit(errs.length ? 1 : 0);

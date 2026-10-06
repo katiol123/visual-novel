@@ -138,7 +138,8 @@
       const C = S.clock;
       $('.clk-time', r).textContent = VN.State.clock();
       $('.clk-label', r).textContent = C.date;
-      $('.clk-left', r).innerHTML = `${C.label} <b>${left}</b> мин`;
+      $('.clk-left', r).innerHTML = C.still ? C.label : `${C.label} <b>${left}</b> мин`;
+      if (C.still) $('.clk-time', r).textContent = '—:—';
       const gone = Math.round(((S.time - C.start) / (C.deadline - C.start)) * 60);
       r.querySelectorAll('.clk-bar i').forEach((i, k) => i.classList.toggle('gone', k < gone));
       $('.hud-clock', r).classList.toggle('urgent', left <= Math.max(15, (C.deadline - C.start) * 0.15));

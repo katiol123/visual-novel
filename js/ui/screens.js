@@ -44,6 +44,7 @@
           <button data-a="new">НОВОЕ ДЕЛО</button>
           <button data-a="cont" ${hasSave ? '' : 'disabled'}>ПРОДОЛЖИТЬ</button>
           <button data-a="act1" ${VN.State.peekActStart(1) ? '' : 'disabled'} title="Продолжить с последнего финала пролога">ГЛАВА I</button>
+          ${VN.State.peekActStart(2) ? '<button data-a="act2" title="Продолжить с последнего финала главы I">ГЛАВА II</button>' : ''}
           <button data-a="load">ЗАГРУЗИТЬ</button>
           <button data-a="board">КОНЦОВКИ <small>${ends}/${Object.keys(VN.Endings).length}</small></button>
         </div>
@@ -51,6 +52,26 @@
       document.getElementById('game').appendChild(t);
       requestAnimationFrame(() => t.classList.add('in'));
       t.addEventListener('click', (e) => e.stopPropagation());
+      // Секретные коды на титуле (по физическим клавишам — работают и в русской раскладке):
+      //   test1 — сразу главу II за опера.
+      let typed = '';
+      const codes = { KeyT: 't', KeyE: 'e', KeyS: 's', Digit1: '1', Numpad1: '1' };
+      const onCode = (ev) => {
+        if (this.node !== t) { window.removeEventListener('keydown', onCode, true); return; }
+        typed = (typed + (codes[ev.code] || '·')).slice(-5);
+        if (typed === 'test1') {
+          window.removeEventListener('keydown', onCode, true);
+          this.hide();
+          VN.State.reset();
+          const B = VN.Backgrounds.cop;
+          Object.assign(VN.S, { background: 'cop', stats: { ...B.stats }, hp: B.hp, maxHp: B.hp });
+          VN.State.give('badge', 1, true);
+          VN.mode.auto = VN.mode.skip = false;
+          VN.Toast.show('<small>ТЕСТ</small><b>Глава II · опер</b>', 'item', VN.Icons.badge);
+          VN.Runner.start('a2_start', 0);
+        }
+      };
+      window.addEventListener('keydown', onCode, true);
       t.querySelectorAll('[data-a]').forEach((b) => {
         b.addEventListener('mouseenter', () => VN.Audio.sfx('hover'));
         b.addEventListener('click', (e) => {
@@ -61,6 +82,7 @@
           if (a === 'cont') { this.hide(); VN.Runner.loadSlot('auto'); }
           if (a === 'load') VN.Saves.open(true);
           if (a === 'act1') { this.hide(); VN.State.loadActStart(1); VN.mode.auto = VN.mode.skip = false; VN.Runner.start('a1_start', 0); }
+          if (a === 'act2') { this.hide(); VN.State.loadActStart(2); VN.mode.auto = VN.mode.skip = false; VN.Runner.start('a2_start', 0); }
           if (a === 'board') VN.Board.open();
         });
       });
@@ -184,23 +206,24 @@
         const blocks = new Set(S.path.map((p) => VN.Story.get(p)).filter((sc) => sc && sc.block && (sc.act || 0) === act).map((sc) => sc.block)).size;
         const actEnds = Object.entries(VN.Endings).filter(([, x]) => (x.act || 0) === act);
         const gotEnds = actEnds.filter(([k]) => VN.Meta.data.endings[k]).length;
-        if (e.next) { S.flags.prologueEnding = id; VN.State.saveActStart(1); }
+        if (e.next) { S.flags[act ? 'act' + act + 'Ending' : 'prologueEnding'] = id; VN.State.saveActStart(act + 1); }
+        const ACTN = ['ПРОЛОГА', 'ГЛАВЫ I', 'ГЛАВЫ II', 'ГЛАВЫ III'], NEXT = { a1_start: 'ГЛАВА I · «ЧЁРНАЯ БУХГАЛТЕРИЯ»', a2_start: 'ГЛАВА II · «ЧТО БЫЛО ДО»' };
         const actClues = Object.keys(VN.Clues).filter((k) => (VN.Clues[k].act || 0) === act);
         const clues = actClues.filter((k) => S.flags[k]).length;
         const s = el('div', 'screen ending');
         s.style.setProperty('--c', e.color);
         s.innerHTML = `
-          <div class="en-kicker">${act ? 'КОНЕЦ ГЛАВЫ I' : 'КОНЕЦ ПРОЛОГА'}${first ? ' · <b>НОВАЯ КОНЦОВКА</b>' : ''}</div>
+          <div class="en-kicker">${act === 2 ? 'КОНЕЦ ВОСПОМИНАНИЯ' : 'КОНЕЦ ' + ACTN[act]}${first ? ' · <b>НОВАЯ КОНЦОВКА</b>' : ''}</div>
           <div class="en-title">${e.title}</div>
           <div class="en-sub">${e.sub}</div>
           <div class="en-stats">
-            <div><b>${VN.State.clock()}</b><span>время</span></div>
+            ${S.clock && S.clock.still ? '' : `<div><b>${VN.State.clock()}</b><span>время</span></div>`}
             <div><b>${blocks}/${total}</b><span>блоков пройдено</span></div>
             <div><b>${clues}/${actClues.length}</b><span>улик</span></div>
             <div><b>${gotEnds}/${actEnds.length}</b><span>концовок ${act ? 'главы' : 'пролога'}</span></div>
           </div>
-          <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act ? 'ГЛАВА II — СКОРО' : 'Этот путь обрывается здесь'}</div>
-          <div class="en-btns">${e.next ? '<button class="btn btn-acid" data-a="next">ГЛАВА I · «ЧЁРНАЯ БУХГАЛТЕРИЯ» →</button>' : ''}<button class="btn ${e.next ? 'btn-ghost' : 'btn-acid'}" data-a="new">НОВОЕ ДЕЛО</button><button class="btn btn-ghost" data-a="board">ДОСКА УЛИК</button><button class="btn btn-ghost" data-a="menu">ГЛАВНОЕ МЕНЮ</button></div>`;
+          <div class="en-next">${e.next ? 'Решения этой ночи пойдут с тобой дальше' : act === 2 ? 'То, что ты решил тогда, аукнется в главе III — скоро' : act ? 'Этот путь обрывается здесь' : 'Этот путь обрывается здесь'}</div>
+          <div class="en-btns">${e.next ? `<button class="btn btn-acid" data-a="next">${NEXT[e.next] || 'ДАЛЬШЕ'} →</button>` : ''}<button class="btn ${e.next ? 'btn-ghost' : 'btn-acid'}" data-a="new">НОВОЕ ДЕЛО</button><button class="btn btn-ghost" data-a="board">ДОСКА УЛИК</button><button class="btn btn-ghost" data-a="menu">ГЛАВНОЕ МЕНЮ</button></div>`;
         s.addEventListener('click', (ev) => ev.stopPropagation());
         s.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', (ev) => {
           ev.stopPropagation();

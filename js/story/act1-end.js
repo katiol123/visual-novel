@@ -16,16 +16,16 @@
   const kongFoe = () => St.foe('kong') && !f('allyKong');
 
   Object.assign(VN.Endings, {
-    a1_ledger: { act: 1, title: 'ЧЁРНАЯ БУХГАЛТЕРИЯ', color: '#b6ff3b', sub: 'Счёт закрыт. Город узнал правду.' },
-    a1_brothers: { act: 1, title: 'ДВА СЧЕТОВОДА', color: '#7fd6ff', sub: 'Мика нажал на спуск. И сел на место Шефа.' },
-    a1_family: { act: 1, title: 'СЕМЕЙНЫЙ БИЗНЕС', color: '#ffb02e', sub: 'Брат выбрал Шефа. Тебе оставили жизнь — и билет из города.' },
-    a1_heir: { act: 1, title: 'НОВЫЙ СЧЕТОВОД', color: '#ffb02e', sub: '«Двойную. С огненным».' },
-    a1_snow: { act: 1, title: 'СНЕГ НАД БАНЕЙ', color: '#ff2a4d', sub: 'Дядя Гена закрыл счёт брата. Одним выстрелом.' },
-    a1_debt: { act: 1, title: 'ДОЛЖНИК', color: '#b6ff3b', sub: 'Кир подписал правильный рапорт.' },
-    a1_wolf: { act: 1, title: 'ВОЛЧИЙ БИЛЕТ', color: '#ff7a3d', sub: 'Счетовод мёртв. Совет жив. Убийца — ты.' },
-    a1_roof2: { act: 1, title: 'НОВАЯ КРЫША', color: '#c9d4c2', sub: 'Шеф пал. Грох забрал всё.' },
-    a1_ash: { act: 1, title: 'ПЕПЕЛ', color: '#8a9488', sub: 'Правда сгорела в банной печи. Вместе с войной.' },
-    a1_dawn: { act: 1, title: 'РАССВЕТ', color: '#ff2a4d', sub: 'Совет решил без тебя.' },
+    a1_ledger: { act: 1, next: 'a2_start', title: 'ЧЁРНАЯ БУХГАЛТЕРИЯ', color: '#b6ff3b', sub: 'Счёт закрыт. Город узнал правду.' },
+    a1_brothers: { act: 1, next: 'a2_start', title: 'ДВА СЧЕТОВОДА', color: '#7fd6ff', sub: 'Мика нажал на спуск. И сел на место Шефа.' },
+    a1_family: { act: 1, next: 'a2_start', title: 'СЕМЕЙНЫЙ БИЗНЕС', color: '#ffb02e', sub: 'Брат выбрал Шефа. Тебе оставили жизнь — и билет из города.' },
+    a1_heir: { act: 1, next: 'a2_start', title: 'НОВЫЙ СЧЕТОВОД', color: '#ffb02e', sub: '«Двойную. С огненным».' },
+    a1_snow: { act: 1, next: 'a2_start', title: 'СНЕГ НАД БАНЕЙ', color: '#ff2a4d', sub: 'Дядя Гена закрыл счёт брата. Одним выстрелом.' },
+    a1_debt: { act: 1, next: 'a2_start', title: 'ДОЛЖНИК', color: '#b6ff3b', sub: 'Кир подписал правильный рапорт.' },
+    a1_wolf: { act: 1, next: 'a2_start', title: 'ВОЛЧИЙ БИЛЕТ', color: '#ff7a3d', sub: 'Счетовод мёртв. Совет жив. Убийца — ты.' },
+    a1_roof2: { act: 1, next: 'a2_start', title: 'НОВАЯ КРЫША', color: '#c9d4c2', sub: 'Шеф пал. Грох забрал всё.' },
+    a1_ash: { act: 1, next: 'a2_start', title: 'ПЕПЕЛ', color: '#8a9488', sub: 'Правда сгорела в банной печи. Вместе с войной.' },
+    a1_dawn: { act: 1, next: 'a2_start', title: 'РАССВЕТ', color: '#ff2a4d', sub: 'Совет решил без тебя.' },
     a1_off: { act: 1, title: 'СПИСАН', color: '#ff2a4d', sub: 'Твою фамилию вычеркнули из книги.' },
   });
 

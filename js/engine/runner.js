@@ -142,7 +142,7 @@
         // начало акта: свои часы и дедлайн, раны перевязаны
         const A = c.act;
         S.act = A.n;
-        S.clock = { start: A.start, deadline: A.deadline, label: A.label, date: A.date };
+        S.clock = { start: A.start, deadline: A.deadline, label: A.label, date: A.date, still: !!A.still };
         S.time = A.start;
         if (A.maxHp) S.maxHp = A.maxHp;
         S.hp = S.maxHp;
