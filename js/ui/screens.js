@@ -47,6 +47,7 @@
           <button data-a="board">КОНЦОВКИ <small>${ends}/${Object.keys(VN.Endings).length}</small></button>
         </div>
         <div class="title-foot">Пробел / клик — дальше · 1–9 — выбор · I — кейс · B — доска · L — журнал · A — авто · S — пропуск · H — скрыть UI</div>`;
+      const tv = el('div', 'title-vol'); tv.appendChild(VN.volumeControl()); t.appendChild(tv);
       document.getElementById('game').appendChild(t);
       requestAnimationFrame(() => t.classList.add('in'));
       t.addEventListener('click', (e) => e.stopPropagation());

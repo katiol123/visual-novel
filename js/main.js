@@ -50,7 +50,7 @@
         return;
       }
       if (!inGame) return;
-      const map = { KeyI: 'inv', KeyB: 'board', KeyL: 'log', KeyA: 'auto', KeyS: 'skip', KeyM: 'mute' };
+      const map = { KeyI: 'inv', KeyB: 'board', KeyL: 'log', KeyA: 'auto', KeyS: 'skip', KeyM: 'muteKey' };
       if (map[e.code]) { VN.HUD.action(map[e.code]); return; }
       if (e.code === 'KeyH') toggleUI();
     });

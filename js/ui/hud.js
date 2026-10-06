@@ -77,8 +77,16 @@
           <button data-act="auto" title="Авто [A]"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 14l30 18-30 18z"/></svg><span>АВТО</span></button>
           <button data-act="skip" title="Пропуск [S]"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><path d="M10 14l22 18-22 18z M32 14l22 18-22 18z"/></svg><span>ПРОПУСК</span></button>
           <button data-act="save" title="Сохранить / загрузить"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 10h34l8 8v36H12z M20 10v14h22V10 M20 54V38h24v16"/></svg><span>ЗАПИСЬ</span></button>
-          <button data-act="mute" title="Звук [M]"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><path d="M10 24h10l14-12v40L20 40H10z M42 22c4 4 4 16 0 20 M48 16c8 8 8 24 0 32"/></svg><span>ЗВУК</span></button>
+          <button data-act="mute" title="Громкость · M — без звука"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><path d="M10 24h10l14-12v40L20 40H10z M42 22c4 4 4 16 0 20 M48 16c8 8 8 24 0 32"/></svg><span>ЗВУК</span></button>
         </div>`;
+      // громкость: всплывающая панель под кнопкой «ЗВУК»
+      const pop = el('div', 'vol-pop');
+      pop.setAttribute('data-ui', '');
+      pop.appendChild(VN.volumeControl());
+      $('.hud-right', root).appendChild(pop);
+      pop.addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('click', () => pop.classList.remove('open'));
+      this.volPop = pop;
       root.querySelectorAll('[data-act]').forEach((b) => {
         b.addEventListener('click', (e) => { e.stopPropagation(); VN.Audio.sfx('click'); this.action(b.dataset.act); });
       });
@@ -127,7 +135,8 @@
       if (a === 'save') VN.Saves.open();
       if (a === 'auto') { VN.mode.auto = !VN.mode.auto; VN.mode.skip = false; if (VN.mode.auto) VN.Input.advance(); }
       if (a === 'skip') { VN.mode.skip = !VN.mode.skip; VN.mode.auto = false; if (VN.mode.skip) VN.Input.advance(); }
-      if (a === 'mute') VN.Audio.toggleMute();
+      if (a === 'mute') this.volPop.classList.toggle('open');
+      if (a === 'muteKey') VN.Audio.toggleMute();
       this.update();
     },
 
@@ -184,6 +193,24 @@
   };
 
   VN.Modal = Modal;
+
+  /** Ползунок громкости + кнопка «без звука». Один компонент — для HUD и для титула. */
+  VN.volumeControl = function () {
+    const w = el('div', 'vol-ctl');
+    w.innerHTML = `<span class="vol-lbl">ГРОМКОСТЬ</span>
+      <input type="range" min="0" max="100" step="1" value="${Math.round(VN.Audio.vol * 100)}" aria-label="Громкость">
+      <b class="vol-num">${Math.round(VN.Audio.vol * 100)}</b>
+      <button class="vol-mute" title="Без звука [M]">${VN.Audio.muted ? 'ВКЛЮЧИТЬ' : 'БЕЗ ЗВУКА'}</button>`;
+    const r = w.querySelector('input'), num = w.querySelector('.vol-num'), mb = w.querySelector('.vol-mute');
+    const paint = () => { r.style.setProperty('--p', r.value + '%'); num.textContent = r.value; mb.textContent = VN.Audio.muted ? 'ВКЛЮЧИТЬ' : 'БЕЗ ЗВУКА'; w.classList.toggle('muted', VN.Audio.muted); };
+    r.addEventListener('input', () => { VN.Audio.init(); if (VN.Audio.muted && +r.value > 0) VN.Audio.toggleMute(); VN.Audio.setVolume(r.value / 100); paint(); });
+    r.addEventListener('change', () => VN.Audio.sfx('click'));
+    mb.addEventListener('click', (e) => { e.stopPropagation(); VN.Audio.init(); VN.Audio.toggleMute(); VN.bus.emit('volume'); });
+    ['click', 'mousedown', 'pointerdown', 'keydown'].forEach((ev) => w.addEventListener(ev, (e) => e.stopPropagation()));
+    VN.bus.on('volume', () => { r.value = Math.round(VN.Audio.vol * 100); paint(); });
+    paint();
+    return w;
+  };
   VN.Toast = Toast;
   VN.HUD = HUD;
 })();

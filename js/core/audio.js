@@ -1,6 +1,7 @@
 /* ==========================================================================
-   Звук без единого файла: всё синтезируется WebAudio на лету.
-   Эмбиент (дождь, гул), SFX (телефон, кости, выстрел…) и боевой луп.
+   Звук: SFX и большая часть эмбиента синтезируются WebAudio на лету,
+   музыка и дождь — из файлов (assets/music). Общая громкость — ползунок
+   (VN.Audio.setVolume, сохраняется между запусками).
    ========================================================================== */
 (function () {
   'use strict';
@@ -9,13 +10,27 @@
   const A = {
     ctx: null, master: null, sfxBus: null, ambBus: null, musBus: null,
     muted: false, noiseBuf: null, amb: {}, music: null, lastTick: 0,
+    vol: (VN.Meta && VN.Meta.data.volume != null) ? VN.Meta.data.volume : 1, // 0…1, ползунок громкости
+    duck: 1, // приглушение эмбиента во время боя
+
+    /** Итоговая громкость синтеза (мастер-шина). */
+    level() { return this.muted ? 0 : 0.8 * this.vol; },
+    /** Ползунок громкости: 0…1. Применяется сразу ко всему — синтезу, музыке, дождю. */
+    setVolume(v) {
+      this.vol = Math.max(0, Math.min(1, v));
+      if (VN.Meta) VN.Meta.set('volume', this.vol);
+      if (this.master) this.master.gain.setTargetAtTime(this.level(), this.ctx.currentTime, 0.05);
+      // всё, что звучит или нарастает, догоняет новую громкость (даже посреди плавного перехода)
+      Object.entries(this.tracks || {}).forEach(([n, t]) => { if (t.on && !t.a.paused) this._fade(n, this._goal(t), 150); });
+      VN.bus && VN.bus.emit('volume', this.vol);
+    },
 
     init() {
       if (this.ctx) { this.ctx.resume && this.ctx.resume(); this.resumeMusic(); return; }
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       const c = (this.ctx = new AC());
-      this.master = c.createGain(); this.master.gain.value = this.muted ? 0 : 0.8;
+      this.master = c.createGain(); this.master.gain.value = this.level();
       this.master.connect(c.destination);
       this.sfxBus = c.createGain(); this.sfxBus.gain.value = 0.9; this.sfxBus.connect(this.master);
       this.ambBus = c.createGain(); this.ambBus.gain.value = 0.7; this.ambBus.connect(this.master);
@@ -30,8 +45,9 @@
 
     toggleMute() {
       this.muted = !this.muted;
-      if (this.master) this.master.gain.setTargetAtTime(this.muted ? 0 : 0.8, this.ctx.currentTime, 0.05);
+      if (this.master) this.master.gain.setTargetAtTime(this.level(), this.ctx.currentTime, 0.05);
       Object.values(this.tracks || {}).forEach((t) => (t.a.muted = this.muted));
+      VN.bus && VN.bus.emit('volume', this.vol);
       return this.muted;
     },
 
@@ -92,7 +108,9 @@
         setTimeout(() => a.nodes.forEach((n) => { try { n.stop(); } catch (e) {} }), 3000);
         delete this.amb[k];
       });
+      if (name !== 'rain') this._rain(false);
       if (!name || name === 'none' || this.amb[name]) return;
+      if (name === 'rain') { this._rain(true); this.amb.rain = { gain: { gain: { setTargetAtTime() {} } }, nodes: [] }; return; }
       const gain = c.createGain(); gain.gain.value = 0; gain.connect(this.ambBus);
       const nodes = [];
       const noiseLayer = (type, freq, q, g) => {
@@ -109,7 +127,6 @@
           o.connect(f); f.connect(gg); gg.connect(gain); o.start(); nodes.push(o);
         });
       };
-      if (name === 'rain') { noiseLayer('lowpass', 1400, 0.3, 0.16); noiseLayer('highpass', 5000, 0.5, 0.025); drone(41.2, 0.05); }
       if (name === 'room') { noiseLayer('lowpass', 500, 0.4, 0.05); drone(55, 0.04); }
       if (name === 'wind') { noiseLayer('bandpass', 400, 0.8, 0.18); drone(36.7, 0.05); }
       if (name === 'hum') { drone(49, 0.05); noiseLayer('bandpass', 120, 2, 0.06); }
@@ -124,6 +141,22 @@
     TRACKS: {
       score: { src: 'assets/music/echoes-of-the-abyss.mp3', vol: 0.42 },
       fight: { src: 'assets/music/steel-tangerines.mp3', vol: 0.6 },
+      rain: { src: 'assets/music/rain.mp3', vol: 0.55, duckable: true }, // эмбиент дождя (файл игрока)
+    },
+    /** Громкость, к которой должен прийти трек сейчас: его база × ползунок × приглушение в бою. */
+    _goal(t) { return t.target * this.vol * (t.duckable ? this.duck : 1); },
+    /** Дождь из файла: включить/выключить с плавным переходом. Независим от музыки сцены. */
+    _rain(on) {
+      const t = this._el('rain');
+      t.on = on;
+      if (on) {
+        t.a.muted = this.muted;
+        const p = t.a.play();
+        if (p && p.catch) p.catch(() => { this.pendingRain = true; });
+        this._fade('rain', this._goal(t), 1500);
+      } else if (!t.a.paused) {
+        this._fade('rain', 0, 1500, () => { if (!this.amb.rain) t.a.pause(); });
+      }
     },
     tracks: {}, sceneTrack: null, fightOn: false, playing: null,
 
@@ -132,7 +165,7 @@
         const t = this.TRACKS[name];
         const a = new Audio(t.src);
         a.loop = true; a.preload = 'auto'; a.volume = 0;
-        this.tracks[name] = { a, target: t.vol, fade: null };
+        this.tracks[name] = { a, target: t.vol, fade: null, duckable: !!t.duckable };
       }
       return this.tracks[name];
     },
@@ -151,14 +184,15 @@
       if (this.playing === name && !restart) return;
       const old = this.playing;
       this.playing = name;
-      if (old) this._fade(old, 0, ms, () => { if (this.playing !== old) this._el(old).a.pause(); });
+      if (old) { this._el(old).on = false; this._fade(old, 0, ms, () => { if (this.playing !== old) this._el(old).a.pause(); }); }
       if (!name) return;
       const t = this._el(name);
+      t.on = true;
       if (restart || t.a.paused) { if (restart) t.a.currentTime = 0; }
       t.a.muted = this.muted;
       const p = t.a.play();
       if (p && p.catch) p.catch(() => { this.pendingMusic = true; });
-      this._fade(name, t.target, ms);
+      this._fade(name, this._goal(t), ms);
     },
     /** Фоновая музыка сцены: 'score' или null. Во время боя только запоминается. */
     music(name) {
@@ -172,7 +206,9 @@
       else { this._duckAmbient(1); this._switch(this.sceneTrack, 1800); }
     },
     _duckAmbient(k) {
+      this.duck = k;
       if (this.ctx && this.ambBus) this.ambBus.gain.setTargetAtTime(0.7 * k, this.ctx.currentTime, 0.4);
+      if (this.amb.rain) this._fade('rain', this._goal(this._el('rain')), 400);
     },
     /** Звук локации: дождь — только дождь; без дождя — фоновая музыка. */
     scene(loc) {
@@ -181,6 +217,7 @@
       else { this.music(null); this.ambient(loc.ambient); }
     },
     resumeMusic() {
+      if (this.pendingRain && this.amb.rain) { this.pendingRain = false; this._rain(true); }
       if (!this.pendingMusic || !this.playing) return;
       this.pendingMusic = false;
       const p = this._el(this.playing).a.play();
