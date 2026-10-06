@@ -346,7 +346,7 @@
         lose: [{ goto: 'ending_cell' }],
         fled: [
           { n: 'Я вылетел через окно уборной, оставив на раме клок куртки и остатки репутации.' },
-          { set: { wanted: true } },
+          { set: { wanted: true, grokhWindow: true } },
           { jump: 'escape' },
         ],
       },
