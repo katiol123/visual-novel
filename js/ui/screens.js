@@ -53,13 +53,13 @@
       requestAnimationFrame(() => t.classList.add('in'));
       t.addEventListener('click', (e) => e.stopPropagation());
       // Секретные коды на титуле (по физическим клавишам — работают и в русской раскладке):
-      //   test1 — сразу главу II за опера, test2 — за боксёра.
+      //   test1 — сразу главу II за опера, test2 — за боксёра, test3 — за карманника.
       let typed = '';
-      const codes = { KeyT: 't', KeyE: 'e', KeyS: 's', Digit1: '1', Numpad1: '1', Digit2: '2', Numpad2: '2' };
+      const codes = { KeyT: 't', KeyE: 'e', KeyS: 's', Digit1: '1', Numpad1: '1', Digit2: '2', Numpad2: '2', Digit3: '3', Numpad3: '3' };
       const onCode = (ev) => {
         if (this.node !== t) { window.removeEventListener('keydown', onCode, true); return; }
         typed = (typed + (codes[ev.code] || '·')).slice(-5);
-        const testBg = { test1: 'cop', test2: 'boxer' }[typed];
+        const testBg = { test1: 'cop', test2: 'boxer', test3: 'thief' }[typed];
         if (testBg) {
           window.removeEventListener('keydown', onCode, true);
           this.hide();

@@ -32,7 +32,7 @@
       { run: (S) => { ['kir', 'grokh', 'kong', 'bugai', 'shef', 'mk', 'texas'].forEach((id) => (S.met[id] = true)); } },
       { bg: 'black', trans: 'fade' },
       { chapter: 'ГЛАВА II', title: 'Что было до' },
-      { goto: () => ({ cop: 'a2c_call', boxer: 'a2b_locker' }[VN.S.background] || 'a2_soon') },
+      { goto: () => ({ cop: 'a2c_call', boxer: 'a2b_locker', thief: 'a2t_tram' }[VN.S.background] || 'a2_soon') },
     ],
   });
 

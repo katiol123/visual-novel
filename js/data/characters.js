@@ -137,6 +137,12 @@
       sprite: SP + 'lysy.png',
       dossier: { no: '1301', role: 'Ринг «Котёл» · 31 победа · 1 поражение', quote: 'Лысым звали с зоны. Ирокез отрастил назло.', threat: 3, stamp: 'ЧЕМПИОН', stampColor: '#c27bff' },
     },
+    /* ---------- глава II · воспоминание карманника ---------- */
+    valet: {
+      name: '«ВАЛЕТ»', short: 'ВАЛЕТ', color: '#c27bff', tag: 'учитель',
+      sprite: SP + 'valet.png',
+      dossier: { no: '0052', role: 'Карманные кражи · ни одной судимости', quote: 'Карман — это доверие, которое человек забыл при себе.', threat: 2, stamp: 'НЕ ПОЙМАН', stampColor: '#c27bff' },
+    },
     schetovod: {
       name: 'ШЕФ · «СЧЕТОВОД»', short: 'СЧЕТОВОД', color: '#ffb02e', tag: 'глава БНК',
       sprite: SP + 'shef.png',
